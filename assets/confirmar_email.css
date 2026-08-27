@@ -1,0 +1,64 @@
+/* ============================================
+   FLUX — Confirmação de troca de e-mail
+   Página: confirmar_email.html
+   Depende de flux.css + auth_1.css (tokens, .auth-*,
+   .verify-*). Aqui ficam apenas os ajustes específicos.
+   ============================================ */
+
+/* ---------- nota informativa do sucesso ---------- */
+.ce-note{
+  display:flex;gap:10px;align-items:flex-start;
+  background:rgba(34,200,245,0.08);
+  border:1px solid rgba(34,200,245,0.3);
+  border-radius:12px;
+  padding:13px 16px;
+  font-size:13px;line-height:1.55;color:var(--text-dim);
+  text-align:left;
+  margin-bottom:26px;
+}
+.ce-note svg{
+  width:16px;height:16px;stroke:var(--accent);fill:none;stroke-width:2;
+  flex-shrink:0;margin-top:1px;
+}
+
+/* ---------- foco visível nos estados (gerenciado via JS) ---------- */
+.verify-state:focus{outline:none;}
+.verify-state:focus-visible,
+#ceOk:focus-visible,
+#ceError:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:8px;
+  border-radius:14px;
+}
+.verify-actions .btn:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:3px;
+}
+
+/* ---------- robustez de layout / sem overflow horizontal ---------- */
+.confirmar-email-root,
+.auth-page{max-width:100%;overflow-x:hidden;}
+.verify-state p,.ce-note span{
+  overflow-wrap:anywhere;
+}
+.verify-actions .btn{min-width:0;}
+
+@media(max-width:600px){
+  .ce-note{padding:11px 13px;font-size:12.5px;}
+  .verify-state h2{font-size:21px;}
+  .verify-state p{font-size:14px;}
+}
+
+/* telas intermediárias: o card centraliza bem entre 601–900px */
+@media(min-width:601px) and (max-width:900px){
+  .auth-card-wrap{padding:48px 0;}
+}
+
+/* ---------- reduced motion ---------- */
+@media(prefers-reduced-motion:reduce){
+  .verify-state,
+  .verify-state.show{animation:none;}
+  .verify-spinner{animation-duration:1.6s;}
+  .ce-note,
+  .verify-actions .btn{transition:none;}
+}

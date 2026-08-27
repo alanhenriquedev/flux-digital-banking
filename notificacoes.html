@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notificações — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/notificacoes.css">
+</head>
+<body id="notifPage">
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="ntf-shell">
+  <header class="ntf-header">
+    <a href="dashboard_1.html" class="ntf-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="ntf-head-right">
+      <span class="ntf-user" id="ntfUser" hidden>
+        <span class="ntf-user-avatar" id="ntfUserInitial">?</span>
+        <span class="ntf-user-name" id="ntfUserName"></span>
+      </span>
+      <nav class="ntf-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="ntf-head-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="ntf-head-btn ntf-head-logout">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="ntf-main">
+    <div class="ntf-wrap">
+
+      <section class="ntf-hero" aria-labelledby="ntfTitle">
+        <span class="ntf-eyebrow">Central de notificações</span>
+        <h1 class="ntf-title" id="ntfTitle">Notificações</h1>
+        <p class="ntf-sub" id="ntfSub">Acompanhe tudo o que acontece na sua conta.</p>
+      </section>
+
+      <!-- RESUMO -->
+      <section class="ntf-summary" aria-label="Resumo de notificações">
+        <div class="ntf-card ntf-sum-unread">
+          <span class="ntf-sum-label">Não lidas</span>
+          <strong class="ntf-sum-value" id="ntfSumUnread">—</strong>
+          <span class="ntf-sum-hint">aguarde credenciamento...</span>
+        </div>
+        <div class="ntf-card ntf-sum-stat">
+          <span class="ntf-sum-label">Total</span>
+          <strong class="ntf-sum-value" id="ntfSumTotal">—</strong>
+        </div>
+      </section>
+
+      <!-- FILTROS E BUSCA -->
+      <section class="ntf-tools" aria-label="Filtros e busca">
+        <fieldset class="ntf-filter">
+          <legend class="sr-only">Filtrar notificações</legend>
+          <div class="ntf-filter-row" role="radiogroup" aria-label="Situação das notificações">
+            <label class="ntf-filter-opt">
+              <input type="radio" name="ntfFilter" value="all" checked>
+              <span>Todas</span>
+            </label>
+            <label class="ntf-filter-opt">
+              <input type="radio" name="ntfFilter" value="unread">
+              <span>Não lidas</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="ntf-search">
+          <label class="sr-only" for="ntfSearchInput">Buscar por título ou mensagem</label>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="ntfSearchInput" placeholder="Buscar por título ou mensagem..." autocomplete="off">
+          <button type="button" class="ntf-search-clear" id="ntfSearchClear" hidden aria-label="Limpar busca">✕</button>
+        </div>
+
+        <button type="button" class="btn btn-ghost ntf-markall" id="ntfMarkAll" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 13l4 4L19 7"/></svg>
+          Marcar todas como lidas
+        </button>
+      </section>
+
+      <p class="ntf-count" id="ntfCount" role="status" aria-live="polite"></p>
+
+      <!-- LISTA -->
+      <section class="ntf-card ntf-list" aria-labelledby="ntfListTitle">
+        <div class="ntf-list-head">
+          <h2 class="ntf-list-title" id="ntfListTitle" tabindex="-1">Notificações</h2>
+        </div>
+
+        <div class="ntf-state show" id="ntfLoading" role="status" aria-live="polite">
+          <div class="verify-spinner"></div>
+          <p>Carregando notificações...</p>
+        </div>
+
+        <div class="ntf-state" id="ntfEmpty" role="status" aria-live="polite">
+          <div class="ntf-empty-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 20.5a2 2 0 0 1-3.4 0"/></svg></div>
+          <p id="ntfEmptyText">Nenhuma notificação encontrada.</p>
+        </div>
+
+        <div class="ntf-state" id="ntfError" role="alert" aria-live="assertive">
+          <div class="ntf-err-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+          <p id="ntfErrorText">Não foi possível carregar as notificações.</p>
+          <button type="button" class="btn btn-ghost" id="ntfRetry">Tentar novamente</button>
+        </div>
+
+        <ul class="ntf-list-ul" id="ntfList"></ul>
+
+        <nav class="stmt-pager ntf-pager" id="ntfPager" aria-label="Paginação das notificações" hidden>
+          <button type="button" class="pager-btn" id="ntfPrev">← Anterior</button>
+          <span class="stmt-pageinfo" id="ntfPageInfo" role="status" aria-live="polite">Página 1 de 1</span>
+          <button type="button" class="pager-btn" id="ntfNext">Próxima →</button>
+        </nav>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="ntf-footer" aria-label="Rodapé da conta">
+    <div class="ntf-foot-grid">
+      <div class="ntf-foot-brand">
+        <div class="logo"><span class="logo-mark"></span>FLUX</div>
+        <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      </div>
+      <div class="ntf-foot-col">
+        <h5>Navegação</h5>
+        <a href="dashboard_1.html">Dashboard</a>
+        <a href="extrato.html">Extrato</a>
+        <a href="notificacoes.html">Notificações</a>
+        <a href="cartao.html">Cartão</a>
+      </div>
+      <div class="ntf-foot-col">
+        <h5>Legal</h5>
+        <a href="termos.html">Termos de uso</a>
+        <a href="privacidade.html">Privacidade</a>
+      </div>
+      <div class="ntf-foot-col ntf-foot-contact">
+        <h5>Contato</h5>
+        <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>
+      </div>
+    </div>
+    <div class="ntf-foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/notificacoes.js"></script>
+</body>
+</html>

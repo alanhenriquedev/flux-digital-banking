@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Configurações — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/configuracoes.css">
+</head>
+<body id="configuracoesPage">
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="cfg-shell">
+  <header class="cfg-header">
+    <a href="dashboard_1.html" class="cfg-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="cfg-head-right">
+      <span class="cfg-user" id="cfgUser" hidden>
+        <span class="cfg-user-avatar" id="cfgUserInitial">?</span>
+        <span class="cfg-user-name" id="cfgUserName"></span>
+      </span>
+      <nav class="cfg-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="cfg-head-btn" aria-label="Voltar para o dashboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="cfg-head-btn cfg-head-logout" aria-label="Sair da conta">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="cfg-main">
+    <div class="cfg-wrap">
+
+      <!-- TÍTULO DA PÁGINA -->
+      <section class="cfg-hero" aria-labelledby="cfgTitle">
+        <span class="cfg-eyebrow">Sua conta</span>
+        <h1 class="cfg-title" id="cfgTitle">Configurações</h1>
+        <p class="cfg-sub" id="cfgSub">Gerencie suas credenciais e acompanhe o acesso à sua conta.</p>
+      </section>
+
+      <!-- CREDENCIAIS -->
+      <section class="cfg-group" aria-label="Credenciais">
+        <div class="cfg-group-head">
+          <h2 class="cfg-group-label">Credenciais</h2>
+          <span class="cfg-group-line" aria-hidden="true"></span>
+        </div>
+
+        <!-- Alterar senha -->
+        <article class="cfg-card cfg-card-acct" aria-labelledby="cfgPassTitle">
+          <div class="cfg-card-head">
+            <span class="cfg-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/><path d="M12 14v3"/></svg></span>
+            <div class="cfg-card-titles">
+              <h3 id="cfgPassTitle">Alterar senha</h3>
+              <p>Mínimo de 8 caracteres com letras e números. Ao concluir, todas as sessões serão encerradas por segurança.</p>
+            </div>
+          </div>
+
+          <form class="cfg-form" id="cfgPassForm" novalidate>
+            <p class="cfg-note cfg-note-success" id="cfgPassSuccess" role="status" aria-live="polite" hidden></p>
+
+            <div class="cfg-form-row cfg-row-pass">
+              <div class="field" id="field-cfgCurrentPassword">
+                <label for="cfgCurrentPassword">Senha atual</label>
+                <div class="input-wrap">
+                  <input type="password" id="cfgCurrentPassword" name="currentPassword" class="has-icon" placeholder="Sua senha atual" autocomplete="current-password">
+                  <button type="button" class="password-toggle" id="cfgToggleCurrent" aria-label="Mostrar senha" aria-pressed="false">
+                    <svg class="eye" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.5 13.5 0 0 1-3.1 3.9M6.2 6.2C3.4 8 1.5 12 1.5 12a13.6 13.6 0 0 0 5 5.6"/></svg>
+                  </button>
+                </div>
+                <div class="field-error" id="err-cfgCurrentPassword" role="alert"></div>
+              </div>
+
+              <div class="field" id="field-cfgNewPassword">
+                <label for="cfgNewPassword">Nova senha</label>
+                <div class="input-wrap">
+                  <input type="password" id="cfgNewPassword" name="newPassword" class="has-icon" placeholder="Mínimo 8 caracteres" autocomplete="new-password">
+                  <button type="button" class="password-toggle" id="cfgToggleNew" aria-label="Mostrar senha" aria-pressed="false">
+                    <svg class="eye" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.5 13.5 0 0 1-3.1 3.9M6.2 6.2C3.4 8 1.5 12 1.5 12a13.6 13.6 0 0 0 5 5.6"/></svg>
+                  </button>
+                </div>
+                <div class="field-error" id="err-cfgNewPassword" role="alert"></div>
+              </div>
+
+              <div class="field" id="field-cfgConfirmPassword">
+                <label for="cfgConfirmPassword">Confirmar nova senha</label>
+                <div class="input-wrap">
+                  <input type="password" id="cfgConfirmPassword" name="confirmNewPassword" class="has-icon" placeholder="Repita a nova senha" autocomplete="new-password">
+                  <button type="button" class="password-toggle" id="cfgToggleConfirm" aria-label="Mostrar senha" aria-pressed="false">
+                    <svg class="eye" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.5 13.5 0 0 1-3.1 3.9M6.2 6.2C3.4 8 1.5 12 1.5 12a13.6 13.6 0 0 0 5 5.6"/></svg>
+                  </button>
+                </div>
+                <div class="field-error" id="err-cfgConfirmPassword" role="alert"></div>
+              </div>
+
+              <div class="cfg-form-actions">
+                <button type="submit" class="btn cfg-submit" id="cfgPassSubmit">Alterar senha</button>
+              </div>
+            </div>
+
+            <p class="cfg-form-error" id="cfgPassError" role="alert" hidden></p>
+          </form>
+        </article>
+
+        <!-- Alterar e-mail -->
+        <article class="cfg-card cfg-card-acct" aria-labelledby="cfgEmailTitle">
+          <div class="cfg-card-head">
+            <span class="cfg-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></span>
+            <div class="cfg-card-titles">
+              <h3 id="cfgEmailTitle">Alterar e-mail</h3>
+              <p>Enviaremos um link de confirmação para o novo endereço antes de concluir a troca.</p>
+            </div>
+          </div>
+
+          <div class="cfg-pending" id="cfgEmailPending" hidden aria-live="polite">
+            <span class="cfg-pending-label">Novo e-mail aguardando confirmação</span>
+            <strong class="cfg-pending-value" id="cfgPendingEmail"></strong>
+            <p class="cfg-pending-note">Seu e-mail atual continua ativo para login e notificações até a confirmação do novo endereço.</p>
+          </div>
+
+          <form class="cfg-form" id="cfgEmailForm" novalidate>
+            <p class="cfg-note cfg-note-success" id="cfgEmailSuccess" role="status" aria-live="polite" hidden></p>
+
+            <div class="cfg-acct-line">
+              <span class="cfg-acct-line-label">E-mail atual</span>
+              <strong class="cfg-acct-line-value" id="cfgCurrentEmail">carregando...</strong>
+            </div>
+
+            <div class="cfg-form-row cfg-row-email">
+              <div class="field" id="field-cfgNewEmail">
+                <label for="cfgNewEmail">Novo e-mail</label>
+                <div class="input-wrap">
+                  <input type="email" id="cfgNewEmail" name="newEmail" placeholder="novo@email.com" autocomplete="off">
+                </div>
+                <div class="field-error" id="err-cfgNewEmail" role="alert"></div>
+              </div>
+
+              <div class="field" id="field-cfgEmailPassword">
+                <label for="cfgEmailPassword">Senha atual</label>
+                <div class="input-wrap">
+                  <input type="password" id="cfgEmailPassword" name="currentPassword" class="has-icon" placeholder="Sua senha atual" autocomplete="current-password">
+                  <button type="button" class="password-toggle" id="cfgToggleEmailPassword" aria-label="Mostrar senha" aria-pressed="false">
+                    <svg class="eye" viewBox="0 0 24 24"><path d="M1.5 12S5 5 12 5s10.5 7 10.5 7-3.5 7-10.5 7S1.5 12 1.5 12Z"/><circle cx="12" cy="12" r="3"/></svg>
+                    <svg class="eye-off" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 10.6a3 3 0 0 0 4.24 4.24M9.9 5.1A10.9 10.9 0 0 1 12 5c7 0 10.5 7 10.5 7a13.5 13.5 0 0 1-3.1 3.9M6.2 6.2C3.4 8 1.5 12 1.5 12a13.6 13.6 0 0 0 5 5.6"/></svg>
+                  </button>
+                </div>
+                <div class="field-error" id="err-cfgEmailPassword" role="alert"></div>
+              </div>
+
+              <div class="cfg-form-actions">
+                <button type="submit" class="btn cfg-submit" id="cfgEmailSubmit">Enviar confirmação</button>
+              </div>
+            </div>
+
+            <p class="cfg-form-error" id="cfgEmailError" role="alert" hidden></p>
+          </form>
+        </article>
+      </section>
+
+      <!-- SEGURANÇA -->
+      <section class="cfg-group" aria-label="Segurança da conta">
+        <div class="cfg-group-head">
+          <h2 class="cfg-group-label">Segurança</h2>
+          <span class="cfg-group-line" aria-hidden="true"></span>
+        </div>
+
+        <!-- Seus acessos — faixa KPI compacta -->
+        <article class="cfg-card cfg-card-kpi" aria-label="Seus acessos">
+          <div class="cfg-kpi-top">
+            <span class="cfg-kpi-heading">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg>
+              Seus acessos
+            </span>
+            <span class="dbv-ov-verified" id="dbvSecVerified"></span>
+          </div>
+
+          <div class="dbv-chart-state show" id="dbvSecOvLoading" role="status" aria-live="polite">
+            <div class="verify-spinner"></div>
+            <p>Carregando seus acessos...</p>
+          </div>
+          <div class="dbv-chart-state" id="dbvSecOvError" role="alert" aria-live="assertive">
+            <p id="dbvSecOvErrorText">Não foi possível carregar seus acessos.</p>
+            <button type="button" class="btn btn-ghost" id="dbvSecOvRetry">Tentar novamente</button>
+          </div>
+
+          <dl class="cfg-kpi-strip" id="dbvSecOvList" hidden>
+            <div class="cfg-kpi">
+              <dt>Último acesso</dt>
+              <dd id="dbvSecLastAccess">—</dd>
+            </div>
+            <div class="cfg-kpi">
+              <dt>Total de acessos</dt>
+              <dd id="dbvSecTotalLogins">—</dd>
+            </div>
+            <div class="cfg-kpi cfg-kpi-session">
+              <dt>Sessão atual</dt>
+              <dd id="dbvSecCurrentSession">—</dd>
+            </div>
+          </dl>
+        </article>
+
+        <!-- Sessões ativas -->
+        <article class="cfg-card" aria-label="Sessões ativas">
+          <div class="cfg-card-head">
+            <span class="cfg-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="12" rx="2"/><path d="M8 20h8M12 16v4"/></svg></span>
+            <div class="cfg-card-titles">
+              <h3>Sessões ativas</h3>
+              <p id="dbvSecSessionsHead">Dispositivos conectados à sua conta.</p>
+            </div>
+          </div>
+
+          <div class="dbv-chart-state show" id="dbvSecSesLoading" role="status" aria-live="polite">
+            <div class="verify-spinner"></div>
+            <p>Carregando sessões...</p>
+          </div>
+          <div class="dbv-chart-state" id="dbvSecSesEmpty" role="status" aria-live="polite">
+            <div class="dbv-empty-ic"><svg viewBox="0 0 24 24"><path d="M5 5h14v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1Z"/><path d="M5 5a7 7 0 0 1 14 0"/></svg></div>
+            <p>Nenhuma sessão ativa no momento.</p>
+          </div>
+          <div class="dbv-chart-state" id="dbvSecSesError" role="alert" aria-live="assertive">
+            <p id="dbvSecSesErrorText">Não foi possível carregar suas sessões.</p>
+            <button type="button" class="btn btn-ghost" id="dbvSecSesRetry">Tentar novamente</button>
+          </div>
+
+          <ul class="dbv-sec-sessions" id="dbvSecSessionsList" hidden aria-live="polite"></ul>
+
+          <button type="button" class="btn btn-ghost dbv-sec-revoke-all" id="dbvSecRevokeOthers" hidden>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.88 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.88.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+            Sair de todos os outros dispositivos
+          </button>
+        </article>
+
+        <!-- Histórico de acessos -->
+        <article class="cfg-card" aria-label="Histórico de acessos">
+          <div class="cfg-card-head">
+            <span class="cfg-card-ic" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 16l4-5 3 3 3-4"/><path d="M8 8h2"/></svg></span>
+            <div class="cfg-card-titles">
+              <h3>Histórico de acessos</h3>
+              <p>Entradas na sua conta Flux, do mais recente para o mais antigo.</p>
+            </div>
+          </div>
+
+          <div class="dbv-chart-state show" id="dbvSecHistLoading" role="status" aria-live="polite">
+            <div class="verify-spinner"></div>
+            <p>Carregando histórico...</p>
+          </div>
+          <div class="dbv-chart-state" id="dbvSecHistEmpty" role="status" aria-live="polite">
+            <div class="dbv-empty-ic"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg></div>
+            <p>Nenhum acesso registrado ainda.<br>Seus próximos logins aparecerão aqui.</p>
+          </div>
+          <div class="dbv-chart-state" id="dbvSecHistError" role="alert" aria-live="assertive">
+            <p id="dbvSecHistErrorText">Não foi possível carregar o histórico.</p>
+            <button type="button" class="btn btn-ghost" id="dbvSecHistRetry">Tentar novamente</button>
+          </div>
+
+          <ul class="dbv-sec-logins" id="dbvSecHistList" hidden aria-live="polite"></ul>
+
+          <div class="dbv-sec-pager" id="dbvSecHistPager" hidden>
+            <button type="button" class="pager-btn" id="dbvSecHistPrev">← Anterior</button>
+            <span class="stmt-pageinfo" id="dbvSecHistPage" role="status" aria-live="polite">Página 1 de 1</span>
+            <button type="button" class="pager-btn" id="dbvSecHistNext">Próxima →</button>
+          </div>
+        </article>
+      </section>
+
+      <!-- ALERTAS -->
+      <section class="cfg-group" aria-label="Alertas">
+        <div class="cfg-group-head">
+          <h2 class="cfg-group-label">Alertas</h2>
+          <span class="cfg-group-line" aria-hidden="true"></span>
+        </div>
+
+        <article class="cfg-card cfg-alerts-card">
+          <div class="dbv-chart-state show" id="cfgAlertLoading" role="status" aria-live="polite">
+            <div class="verify-spinner"></div><p>Carregando preferências de alerta...</p>
+          </div>
+          <div class="dbv-chart-state" id="cfgAlertError" role="alert" aria-live="assertive">
+            <p id="cfgAlertErrorText">Não foi possível carregar seus alertas.</p>
+            <button type="button" class="btn btn-ghost" id="cfgAlertRetry">Tentar novamente</button>
+          </div>
+
+          <ul class="cfg-alert-list" id="cfgAlertList" hidden></ul>
+
+          <p class="cfg-alert-note" id="cfgAlertNote">
+            Escolha quais eventos você quer receber. Os alertas aparecem junto das suas notificações.
+          </p>
+          <p class="cfg-alert-feedback" id="cfgAlertFeedback" role="status" aria-live="polite" hidden></p>
+        </article>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="cfg-footer" aria-label="Rodapé da conta">
+    <div class="cfg-foot-grid">
+      <div class="cfg-foot-brand">
+        <div class="logo"><span class="logo-mark"></span>FLUX</div>
+        <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      </div>
+      <div class="cfg-foot-col">
+        <h5>Navegação</h5>
+        <a href="dashboard_1.html">Dashboard</a>
+        <a href="extrato.html">Extrato</a>
+        <a href="pix.html">Enviar PIX</a>
+        <a href="cartao.html">Cartão</a>
+      </div>
+      <div class="cfg-foot-col">
+        <h5>Legal</h5>
+        <a href="termos.html">Termos de uso</a>
+        <a href="privacidade.html">Privacidade</a>
+      </div>
+      <div class="cfg-foot-col cfg-foot-contact">
+        <h5>Contato</h5>
+        <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>
+      </div>
+    </div>
+    <div class="cfg-foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </footer>
+</div>
+
+<!-- Encerrar sessão — modal acessível no padrão da contratação -->
+<div class="dbv-modal" id="dbvSecModal" role="dialog" aria-modal="true"
+     aria-labelledby="dbvSecModalTitle" aria-describedby="dbvSecModalDesc" aria-hidden="true" hidden>
+  <div class="dbv-modal-backdrop" data-dbvm-close></div>
+  <div class="dbv-modal-panel" id="dbvSecModalPanel" role="document">
+    <button type="button" class="dbv-modal-x" id="dbvSecModalClose" aria-label="Fechar confirmação">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="dbv-modal-eyebrow">Segurança da conta</div>
+    <h2 class="dbv-modal-title" id="dbvSecModalTitle">Encerrar acesso deste dispositivo?</h2>
+    <p class="dbv-modal-desc" id="dbvSecModalDesc">
+      Todas as sessões abertas neste navegador serão encerradas. Confira os dados antes de confirmar.
+    </p>
+    <dl class="dbv-modal-summary" id="dbvSecModalSummary" hidden>
+      <div class="dbv-ms-row">
+        <dt>Dispositivo</dt>
+        <dd id="dbvSecModalDevice">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>IP</dt>
+        <dd id="dbvSecModalIp">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Sessões ativas</dt>
+        <dd id="dbvSecModalCount">—</dd>
+      </div>
+    </dl>
+    <p class="dbv-modal-err" id="dbvSecModalError" role="alert" hidden></p>
+    <div class="dbv-modal-actions">
+      <button type="button" class="btn dbv-modal-cancel" id="dbvSecModalCancel">Cancelar</button>
+      <button type="button" class="btn dbv-modal-confirm" id="dbvSecModalConfirm">
+        <span id="dbvSecModalConfirmText">Confirmar</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/alertas-config.js"></script>
+<script src="assets/configuracoes.js"></script>
+</body>
+</html>

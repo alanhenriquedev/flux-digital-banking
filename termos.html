@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Termos de Uso — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<div class="bg-grid"></div>
+
+<div class="legal-page">
+  <div class="auth-topbar">
+    <div class="logo"><span class="logo-mark"></span>FLUX</div>
+    <a href="cadastro_1.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      Voltar para o cadastro
+    </a>
+  </div>
+
+  <main id="main-content" tabindex="-1" class="legal-main">
+    <div class="legal-card">
+      <div class="legal-demo" role="note">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span><strong>Documento de demonstração.</strong> Este texto é fictício e integra um projeto de portfólio. Não é um documento jurídico válido nem representa a política de qualquer instituição financeira real. Não forneça dados pessoais verdadeiros no ambiente de demonstração.</span>
+      </div>
+
+      <h1>Termos de Uso</h1>
+      <p class="legal-meta">Última atualização: agosto de 2026</p>
+
+      <h2>1. Sobre este documento</h2>
+      <p>Estes Termos de Uso descrevem, de forma simplificada e ilustrativa, as regras de utilização da aplicação <strong>Flux</strong>. A plataforma é um estudo visual e funcional construído com fins de apresentação em portfólio e <strong>não</strong> disponibiliza contas, cartões, Pix ou qualquer serviço financeiro real.</p>
+      <p>Por se tratar de uma demonstração, estes termos não geram vínculo jurídico entre as partes e não configuram contratação de produtos ou serviços.</p>
+
+      <h2>2. Objeto da demonstração</h2>
+      <p>A aplicação demonstra um fluxo completo de abertura de conta digital fictícia: cadastro, verificação de e-mail, login e interface do painel. Todos os valores, saldos, faturas e dados exibidos são inventados e usados apenas para ilustrar o comportamento da interface.</p>
+
+      <h2>3. Cadastro e conta</h2>
+      <ul>
+        <li>O cadastro é facultativo e serve unicamente para demonstrar o fluxo de criação de conta.</li>
+        <li>Recomenda-se o uso de <strong>dados fictícios</strong> ao explorar o ambiente de demonstração.</li>
+        <li>O acesso após o cadastro depende da confirmação do e-mail, por meio de um link simulado enviado para o endereço informado.</li>
+      </ul>
+
+      <h2>4. Uso aceitável</h2>
+      <ul>
+        <li>Utilize a demonstração apenas para fins educacionais e de avaliação de design.</li>
+        <li>É proibido tentar acessar dados de outros usuários, interromper o funcionamento da aplicação ou realizar engenharia reversa dos serviços simulados.</li>
+        <li>Não insira informações sensíveis, senhas utilizadas em outros serviços ou dados de pagamento reais.</li>
+      </ul>
+
+      <h2>5. Propriedade intelectual</h2>
+      <p>Todo o código, layout, tipografia, ilustrações e demais elementos visuais da demonstração pertencem ao seu autor, salvo recursos de terceiros devidamente licenciados. É permitida a reprodução parcial com a devida menção ao projeto, vedada a utilização comercial sem autorização.</p>
+
+      <h2>6. Limitação de responsabilidade</h2>
+      <p>A aplicação é fornecida <strong>no estado em que se encontra</strong>. O autor não se responsabiliza por quaisquer danos diretos ou indiretos decorrentes do uso do ambiente de demonstração, incluindo perda de dados, interrupções ou divergências entre o comportamento simulado e o de um serviço real.</p>
+
+      <h2>7. Disponibilidade e alterações</h2>
+      <p>A demonstração pode ser modificada, suspensa ou encerrada a qualquer momento, sem aviso prévio, para fins de manutenção, evolução do portfólio ou outros. Estes Termos também podem ser atualizados sem comunicação formal.</p>
+
+      <h2>8. Contato</h2>
+      <p>Para esclarecimentos sobre esta demonstração, utilize o contato fictício <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>. Responderemos apenas dentro do contexto do projeto de portfólio.</p>
+
+      <div class="legal-foot">
+        <span>© <span id="year"></span> Flux — projeto de demonstração</span>
+        <a class="legal-back" href="cadastro_1.html">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          Voltar para o cadastro
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var dest = {
+    landing: ['flux_7.html', 'Voltar para o site'],
+    cadastro: ['cadastro_1.html', 'Voltar para o cadastro']
+  };
+  var from = new URLSearchParams(location.search).get('from');
+  var ref = dest[from] || dest.cadastro;
+  document.querySelectorAll('.back-link, .legal-back').forEach(function (a) {
+    a.href = ref[0];
+    var t = Array.prototype.find.call(a.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim().length > 0; });
+    if (t) t.textContent = ' ' + ref[1];
+  });
+})();
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

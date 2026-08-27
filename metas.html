@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Metas financeiras — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/metas.css">
+</head>
+<body id="metasPage">
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="met-shell">
+  <header class="met-header">
+    <a href="dashboard_1.html" class="met-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="met-head-right">
+      <span class="met-user" id="metUser" hidden>
+        <span class="met-user-avatar" id="metUserInitial">?</span>
+        <span class="met-user-name" id="metUserName"></span>
+      </span>
+      <nav class="met-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="met-head-btn" aria-label="Voltar para o dashboard">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="met-head-btn met-head-logout" aria-label="Sair da conta">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="met-main">
+    <div class="met-wrap">
+
+      <section class="met-hero" aria-labelledby="metTitle">
+        <span class="met-eyebrow">Planejamento</span>
+        <h1 class="met-title" id="metTitle">Metas financeiras</h1>
+        <p class="met-sub">Guarde dinheiro com propósito e acompanhe seu progresso.</p>
+      </section>
+
+      <!-- RESUMO -->
+      <section class="met-summary" aria-label="Resumo das metas">
+        <div class="dbv-chart-state show" id="metSumLoading" role="status" aria-live="polite">
+          <div class="verify-spinner"></div><p>Carregando resumo...</p>
+        </div>
+        <dl class="met-sum-strip" id="metSumStrip" hidden>
+          <div class="met-sum-item">
+            <dt>Total guardado</dt>
+            <dd id="metSumSaved">—</dd>
+          </div>
+          <div class="met-sum-item">
+            <dt>Ativas</dt>
+            <dd id="metSumActive">—</dd>
+          </div>
+          <div class="met-sum-item">
+            <dt>Concluídas</dt>
+            <dd id="metSumDone">—</dd>
+          </div>
+        </dl>
+      </section>
+
+      <!-- TOOLBAR -->
+      <div class="met-toolbar">
+        <p class="met-count" id="metCount" role="status" aria-live="polite"></p>
+        <button type="button" class="btn met-new" id="metNewBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+          Nova meta
+        </button>
+      </div>
+
+      <!-- LISTA -->
+      <section aria-label="Suas metas">
+        <div class="dbv-chart-state show" id="metLoading" role="status" aria-live="polite">
+          <div class="verify-spinner"></div><p>Carregando metas...</p>
+        </div>
+        <div class="dbv-chart-state" id="metEmpty" role="status" aria-live="polite">
+          <div class="met-empty-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
+          <p>Você ainda não tem metas.<br>Crie a primeira e comece a guardar.</p>
+          <button type="button" class="btn btn-ghost" id="metEmptyNew">Criar primeira meta</button>
+        </div>
+        <div class="dbv-chart-state" id="metError" role="alert" aria-live="assertive">
+          <p id="metErrorText">Não foi possível carregar suas metas.</p>
+          <button type="button" class="btn btn-ghost" id="metRetry">Tentar novamente</button>
+        </div>
+
+        <ul class="met-list" id="metList" hidden></ul>
+
+        <p class="met-feedback" id="metFeedback" role="status" aria-live="polite" hidden></p>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="met-footer" aria-label="Rodapé da conta">
+    <div class="met-foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </footer>
+</div>
+
+<!-- MODAL: criar/editar meta -->
+<div class="met-modal" id="metFormModal" role="dialog" aria-modal="true"
+     aria-labelledby="metFormTitle" aria-hidden="true" hidden>
+  <div class="met-modal-backdrop" data-met-close></div>
+  <div class="met-modal-panel" role="document">
+    <button type="button" class="met-modal-x" id="metFormClose" aria-label="Fechar formulário">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="met-modal-eyebrow" id="metFormEyebrow">Nova meta</div>
+    <h2 class="met-modal-title" id="metFormTitle">Criar meta</h2>
+
+    <form id="metGoalForm" novalidate>
+      <input type="hidden" id="metGoalId" value="">
+      <div class="field" id="field-metName">
+        <label for="metName">Nome da meta</label>
+        <input type="text" id="metName" maxlength="80" placeholder="Ex.: Viagem, Reserva..." autocomplete="off">
+        <div class="field-error" id="err-metName" role="alert"></div>
+      </div>
+      <div class="field" id="field-metDescription">
+        <label for="metDescription">Descrição <em>(opcional)</em></label>
+        <input type="text" id="metDescription" maxlength="240" placeholder="Detalhe seu propósito" autocomplete="off">
+        <div class="field-error" id="err-metDescription" role="alert"></div>
+      </div>
+      <div class="met-form-grid2">
+        <div class="field" id="field-metTarget">
+          <label for="metTarget">Valor objetivo (R$)</label>
+          <input type="number" id="metTarget" min="1" step="0.01" placeholder="5000,00" inputmode="decimal">
+          <div class="field-error" id="err-metTarget" role="alert"></div>
+        </div>
+        <div class="field" id="field-metDeadline">
+          <label for="metDeadline">Data alvo <em>(opcional)</em></label>
+          <input type="date" id="metDeadline">
+          <div class="field-error" id="err-metDeadline" role="alert"></div>
+        </div>
+      </div>
+
+      <p class="met-modal-err" id="metFormError" role="alert" hidden></p>
+
+      <div class="met-modal-actions">
+        <button type="button" class="btn met-cancel" data-met-close>Cancelar</button>
+        <button type="submit" class="btn met-confirm" id="metFormSubmit">Criar meta</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MODAL: aporte / retirada -->
+<div class="met-modal" id="metMoneyModal" role="dialog" aria-modal="true"
+     aria-labelledby="metMoneyTitle" aria-describedby="metMoneyDesc" aria-hidden="true" hidden>
+  <div class="met-modal-backdrop" data-met-close></div>
+  <div class="met-modal-panel" role="document">
+    <button type="button" class="met-modal-x" id="metMoneyClose" aria-label="Fechar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="met-modal-eyebrow" id="metMoneyEyebrow">Aporte</div>
+    <h2 class="met-modal-title" id="metMoneyTitle">Adicionar dinheiro</h2>
+    <p class="met-modal-desc" id="metMoneyDesc">O valor sai do saldo disponível da sua conta.</p>
+
+    <form id="metMoneyForm" novalidate>
+      <input type="hidden" id="metMoneyGoalId" value="">
+      <input type="hidden" id="metMoneyMode" value="deposit">
+      <div class="field" id="field-metAmount">
+        <label for="metAmount">Valor (R$)</label>
+        <input type="number" id="metAmount" min="0.01" step="0.01" placeholder="0,00" inputmode="decimal">
+        <div class="field-error" id="err-metAmount" role="alert"></div>
+      </div>
+      <p class="met-money-hint" id="metMoneyHint">Disponível na conta: —</p>
+
+      <p class="met-modal-err" id="metMoneyError" role="alert" hidden></p>
+
+      <div class="met-modal-actions">
+        <button type="button" class="btn met-cancel" data-met-close>Cancelar</button>
+        <button type="submit" class="btn met-confirm" id="metMoneySubmit">Adicionar</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/metas.js"></script>
+</body>
+</html>

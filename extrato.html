@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Extrato — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/extrato.css">
+</head>
+<body id="extratoPage">
+<div class="bg-grid" aria-hidden="true"></div>
+
+<div class="extr-shell">
+  <header class="extr-header">
+    <a href="dashboard_1.html" class="extr-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="extr-head-right">
+      <span class="extr-user" id="extrUser" hidden>
+        <span class="extr-user-avatar" id="extrUserInitial">?</span>
+        <span class="extr-user-name" id="extrUserName"></span>
+      </span>
+      <nav class="extr-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="extr-head-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="extr-head-btn extr-head-logout">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="extr-main">
+    <div class="extr-wrap">
+
+      <section class="extr-hero" aria-labelledby="extrTitle">
+        <span class="extr-eyebrow">Histórico completo</span>
+        <h1 class="extr-title" id="extrTitle">Extrato da conta</h1>
+        <p class="extr-sub" id="extrSub">Todas as suas movimentações, com filtros e busca.</p>
+      </section>
+
+      <!-- RESUMO DO PERÍODO -->
+      <section class="extr-summary" aria-label="Resumo do período">
+        <div class="extr-card extr-sum-net">
+          <span class="extr-sum-label">Resultado no período</span>
+          <strong class="extr-sum-value " id="extrSumNet">—</strong>
+          <span class="extr-sum-hint" id="extrSumPeriod">carregando período...</span>
+        </div>
+        <div class="extr-card extr-sum-stat">
+          <span class="extr-sum-label">Entradas</span>
+          <strong class="extr-sum-value is-in" id="extrSumIn">—</strong>
+        </div>
+        <div class="extr-card extr-sum-stat">
+          <span class="extr-sum-label">Saídas</span>
+          <strong class="extr-sum-value is-out" id="extrSumOut">—</strong>
+        </div>
+        <div class="extr-card extr-sum-stat">
+          <span class="extr-sum-label">Lançamentos</span>
+          <strong class="extr-sum-value" id="extrSumCount">—</strong>
+        </div>
+      </section>
+
+      <!-- FILTROS -->
+      <section class="extr-filters" aria-label="Filtros do extrato">
+        <fieldset class="extr-type" id="extrTypeFilter">
+          <legend class="sr-only">Filtrar por tipo de movimentação</legend>
+          <div class="extr-type-row" role="radiogroup" aria-label="Tipo de movimentação">
+            <label class="extr-type-opt">
+              <input type="radio" name="extrType" value="all" checked>
+              <span>Todos</span>
+            </label>
+            <label class="extr-type-opt">
+              <input type="radio" name="extrType" value="IN">
+              <span>Entradas</span>
+            </label>
+            <label class="extr-type-opt">
+              <input type="radio" name="extrType" value="OUT">
+              <span>Saídas</span>
+            </label>
+            <label class="extr-type-opt">
+              <input type="radio" name="extrType" value="PIX">
+              <span>PIX</span>
+            </label>
+            <label class="extr-type-opt">
+              <input type="radio" name="extrType" value="CARD">
+              <span>Cartão</span>
+            </label>
+          </div>
+        </fieldset>
+
+        <div class="extr-search">
+          <label class="sr-only" for="extrSearchInput">Buscar por descrição ou contraparte</label>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <input type="search" id="extrSearchInput" placeholder="Buscar por descrição ou contraparte..." autocomplete="off">
+          <button type="button" class="extr-search-clear" id="extrSearchClear" hidden aria-label="Limpar busca">✕</button>
+        </div>
+        <p class="extr-count" id="extrCount" role="status" aria-live="polite"></p>
+      </section>
+
+      <!-- LISTA -->
+      <section class="extr-card extr-list" aria-labelledby="extrListTitle">
+        <div class="extr-list-head">
+          <h2 class="extr-list-title" id="extrListTitle" tabindex="-1">Movimentações</h2>
+        </div>
+
+        <div class="extr-state show" id="extrLoading" role="status" aria-live="polite">
+          <div class="verify-spinner"></div>
+          <p>Buscando suas movimentações...</p>
+        </div>
+
+        <div class="extr-state" id="extrEmpty" role="status" aria-live="polite">
+          <div class="extr-empty-ic"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg></div>
+          <p id="extrEmptyText">Nenhuma movimentação encontrada.</p>
+        </div>
+
+        <div class="extr-state" id="extrError" role="alert" aria-live="assertive">
+          <div class="extr-err-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16.5v.01"/></svg></div>
+          <p id="extrErrorText">Não foi possível carregar o extrato.</p>
+          <button type="button" class="btn btn-ghost" id="extrRetry">Tentar novamente</button>
+        </div>
+
+        <ul class="extr-list-ul" id="extrList"></ul>
+
+        <nav class="stmt-pager extr-pager" id="extrPager" aria-label="Paginação do extrato" hidden>
+          <button type="button" class="pager-btn" id="extrPrev">← Anterior</button>
+          <span class="stmt-pageinfo" id="extrPageInfo" role="status" aria-live="polite">Página 1 de 1</span>
+          <button type="button" class="pager-btn" id="extrNext">Próxima →</button>
+        </nav>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- DETALHE DA MOVIMENTAÇÃO -->
+  <div class="extr-detail" id="extrDetail" role="dialog" aria-modal="true" aria-labelledby="extrDetailTitle" hidden>
+    <div class="extr-detail-backdrop" data-extr-close></div>
+    <div class="extr-detail-card" role="document">
+      <div class="extr-detail-head">
+        <h2 class="extr-detail-title" id="extrDetailTitle">Detalhe da movimentação</h2>
+        <button type="button" class="extr-detail-close" id="extrDetailClose" aria-label="Fechar detalhe">✕</button>
+      </div>
+      <dl class="extr-detail-body" id="extrDetailBody"></dl>
+    </div>
+  </div>
+
+  <!-- RODAPÉ -->
+  <footer class="extr-footer" aria-label="Rodapé da conta">
+    <div class="extr-foot-grid">
+      <div class="extr-foot-brand">
+        <div class="logo"><span class="logo-mark"></span>FLUX</div>
+        <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      </div>
+      <div class="extr-foot-col">
+        <h5>Navegação</h5>
+        <a href="dashboard_1.html">Dashboard</a>
+        <a href="extrato.html">Extrato</a>
+        <a href="pix.html">Enviar PIX</a>
+        <a href="cartao.html">Cartão</a>
+      </div>
+      <div class="extr-foot-col">
+        <h5>Legal</h5>
+        <a href="termos.html">Termos de uso</a>
+        <a href="privacidade.html">Privacidade</a>
+      </div>
+      <div class="extr-foot-col extr-foot-contact">
+        <h5>Contato</h5>
+        <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>
+      </div>
+    </div>
+    <div class="extr-foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </footer>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/extrato.js"></script>
+</body>
+</html>

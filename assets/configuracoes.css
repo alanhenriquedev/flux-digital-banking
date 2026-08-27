@@ -1,0 +1,753 @@
+/* ============================================
+   FLUX — Configurações da conta (configuracoes.html)
+   Shell da página + Credenciais + Segurança
+   (faixa KPI, sessões, histórico e modal).
+   Carregado SOMENTE em configuracoes.html. Nada
+   aqui afeta dashboard, PIX, cartão ou landing.
+   ============================================ */
+
+#configuracoesPage{
+  --cfg-ease:cubic-bezier(.16,.8,.3,1);
+  --cfg-radius:18px;
+  --cfg-radius-sm:12px;
+  --cfg-gap:16px;
+  --cfg-pad:24px;
+  --cfg-border:#232a36;
+  --cfg-border-soft:#1b212b;
+}
+#configuracoesPage .cfg-shell{min-height:100vh;display:flex;flex-direction:column;position:relative;z-index:1;}
+#configuracoesPage{min-width:0;}
+
+/* atributo hidden sempre vence de qualquer display */
+#configuracoesPage [hidden]{display:none !important;}
+body.dbv-modal-open{overflow:hidden;}
+
+/* ============================================
+   UTILIDADES
+   ============================================ */
+#configuracoesPage .sr-only{
+  position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0;
+}
+
+/* ============================================
+   HEADER
+   ============================================ */
+#configuracoesPage .cfg-header{
+  position:sticky;top:0;z-index:50;
+  background:rgba(9,11,15,0.72);
+  backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border-soft);
+  display:flex;align-items:center;justify-content:space-between;gap:18px;
+  padding:16px 32px;
+}
+#configuracoesPage .cfg-logo{
+  display:flex;align-items:center;gap:10px;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:22px;letter-spacing:.5px;
+  transition:opacity .2s ease;
+}
+#configuracoesPage .cfg-logo:hover{opacity:.85;}
+/* micro-interação da marca: o mark inclina sutilmente no hover */
+#configuracoesPage .cfg-logo .logo-mark{transition:transform .3s var(--cfg-ease);}
+#configuracoesPage .cfg-logo:hover .logo-mark{transform:translateY(-1px) rotate(-6deg);}
+#configuracoesPage .cfg-head-right{display:flex;align-items:center;gap:16px;}
+#configuracoesPage .cfg-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:12px;padding:0;max-width:none;margin:0;}
+#configuracoesPage .cfg-head-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  font-size:13.5px;font-weight:600;color:var(--text-dim);font-family:'Inter',sans-serif;
+  padding:9px 16px;border-radius:100px;
+  border:1px solid var(--cfg-border);background:rgba(255,255,255,0.015);
+  transition:color .2s ease,border-color .2s ease,background .2s ease,transform .15s var(--cfg-ease);
+}
+#configuracoesPage .cfg-head-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+#configuracoesPage .cfg-head-btn:hover{color:var(--text);border-color:var(--text-faint);background:rgba(255,255,255,0.03);transform:translateY(-1px);}
+#configuracoesPage .cfg-head-btn:active{transform:translateY(0) scale(.97);}
+#configuracoesPage .cfg-head-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#configuracoesPage .cfg-head-logout:hover{color:var(--down);border-color:rgba(255,92,122,0.5);}
+
+#configuracoesPage .cfg-user{display:inline-flex;align-items:center;gap:10px;cursor:default;}
+#configuracoesPage .cfg-user-avatar{
+  width:34px;height:34px;border-radius:50%;
+  background:var(--accent-grad);color:#04121a;
+  font-family:'Space Grotesk',sans-serif;font-weight:700;font-size:13px;
+  display:flex;align-items:center;justify-content:center;
+  box-shadow:inset 0 1px 1px rgba(255,255,255,0.4);
+}
+#configuracoesPage .cfg-user-name{font-size:13.5px;font-weight:600;color:var(--text);}
+
+/* ============================================
+   MAIN / HERO / GRUPOS
+   ============================================ */
+#configuracoesPage .cfg-main{flex:1;padding:44px 24px 84px;}
+#configuracoesPage .cfg-wrap{max-width:1120px;margin:0 auto;width:100%;}
+#configuracoesPage .cfg-wrap > *{min-width:0;}
+
+#configuracoesPage .cfg-hero{position:relative;margin-bottom:38px;padding-bottom:26px;}
+/* hairline de identidade: fecha o hero com o mesmo motivo das seções */
+#configuracoesPage .cfg-hero::after{
+  content:'';position:absolute;left:0;right:0;bottom:0;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,var(--border-soft) 0%,transparent 72%);
+}
+#configuracoesPage .cfg-eyebrow{
+  font-size:12px;font-weight:700;letter-spacing:2.2px;text-transform:uppercase;
+  color:var(--accent);margin-bottom:14px;display:flex;align-items:center;gap:10px;
+}
+#configuracoesPage .cfg-eyebrow::before{content:'';width:16px;height:2px;background:var(--accent-grad);border-radius:2px;}
+#configuracoesPage .cfg-title{
+  font-family:'Space Grotesk',sans-serif;font-size:clamp(27px,4.2vw,35px);
+  font-weight:700;letter-spacing:-0.6px;line-height:1.1;
+}
+#configuracoesPage .cfg-sub{color:var(--text-dim);font-size:15px;margin-top:10px;line-height:1.6;max-width:600px;}
+
+/* grupo = rótulo discreto + hairline + cards no mesmo trilho */
+#configuracoesPage .cfg-group{display:flex;flex-direction:column;gap:18px;}
+#configuracoesPage .cfg-group + .cfg-group{margin-top:44px;}
+#configuracoesPage .cfg-group-head{display:flex;align-items:center;gap:14px;margin-bottom:2px;}
+#configuracoesPage .cfg-group-label{
+  font-family:'Inter',sans-serif;font-size:12px;font-weight:700;
+  letter-spacing:1.8px;text-transform:uppercase;color:var(--text-faint-strong);
+  display:inline-flex;align-items:center;gap:10px;margin:0;
+}
+#configuracoesPage .cfg-group-label::before{content:'';width:14px;height:2px;background:var(--accent-grad);border-radius:2px;}
+#configuracoesPage .cfg-group-line{
+  flex:1;height:1px;min-width:0;
+  background:linear-gradient(90deg,var(--cfg-border-soft),transparent 85%);
+}
+
+/* ============================================
+   CARD BASE (sem hover no card inteiro)
+   ============================================ */
+#configuracoesPage .cfg-card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--cfg-radius);
+  padding:var(--cfg-pad);
+  display:flex;flex-direction:column;gap:var(--cfg-gap);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+  min-width:0;
+}
+
+/* cabeçalhos sempre transparentes: o título senta direto no fundo
+   do card/página — nenhum bloco escuro, nenhum card interno.
+   Defesa extra: neutraliza o chrome global `header{}` do flux.css
+   (fundo rgba(9,11,15,.72) + blur via ::before/::after e sticky),
+   caso estas linhas voltem a ser <header>. A barra .cfg-header
+   (navegação do topo) NÃO é afetada. */
+#configuracoesPage .cfg-group-head,
+#configuracoesPage .cfg-card-head,
+#configuracoesPage .cfg-kpi-top{
+  background:transparent;border:0;box-shadow:none;
+  position:static;z-index:auto;
+  -webkit-backdrop-filter:none;backdrop-filter:none;
+}
+#configuracoesPage .cfg-group-head::before,
+#configuracoesPage .cfg-group-head::after,
+#configuracoesPage .cfg-card-head::before,
+#configuracoesPage .cfg-card-head::after,
+#configuracoesPage .cfg-kpi-top::before,
+#configuracoesPage .cfg-kpi-top::after{
+  content:none !important;background:none;border:0;box-shadow:none;
+}
+#configuracoesPage .cfg-group-label,
+#configuracoesPage .cfg-card-titles h3,
+#configuracoesPage .cfg-kpi-heading{background:transparent;}
+
+#configuracoesPage .cfg-card-head{display:flex;align-items:flex-start;gap:14px;min-width:0;padding:0;}
+#configuracoesPage .cfg-card-titles{min-width:0;flex:1;}
+#configuracoesPage .cfg-card-titles h3{
+  font-family:'Space Grotesk',sans-serif;font-size:15.5px;font-weight:700;
+  letter-spacing:-0.2px;color:var(--text);margin-bottom:3px;
+}
+#configuracoesPage .cfg-card-titles p{
+  font-size:12.5px;color:var(--text-dim);line-height:1.55;max-width:620px;
+}
+#configuracoesPage .cfg-card-ic{
+  width:40px;height:40px;border-radius:var(--cfg-radius-sm);flex-shrink:0;
+  background:transparent;border:1px solid transparent;
+  display:flex;align-items:center;justify-content:center;color:var(--accent);
+}
+#configuracoesPage .cfg-card-ic svg{width:19px;height:19px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ============================================
+   CREDENCIAIS — CENTRAL DE CONTA (polimento)
+   Escopado em .cfg-card-acct: afeta SOMENTE os
+   blocos "Alterar senha" e "Alterar e-mail".
+   ============================================ */
+/* caixa mais leve: fundo um passo acima da página,
+   borda sutil, sombra quase imperceptível */
+#configuracoesPage .cfg-card-acct{
+  background:#10151e;
+  border-color:#1d2430;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.03), 0 12px 32px -26px rgba(0,0,0,0.55);
+  padding:22px 24px;
+}
+
+/* cabeçalho limpo com hairline de separação */
+#configuracoesPage .cfg-card-acct .cfg-card-head{
+  align-items:center;
+  padding-bottom:14px;
+  border-bottom:1px solid var(--border-soft);
+}
+#configuracoesPage .cfg-card-acct .cfg-card-titles h3{font-size:16px;margin-bottom:2px;}
+
+/* ícone: glifo accent com micro-lift quando o formulário tem foco */
+#configuracoesPage .cfg-card-acct .cfg-card-ic{
+  width:36px;height:36px;border-radius:11px;
+  transition:transform .25s var(--cfg-ease), color .2s ease;
+}
+#configuracoesPage .cfg-card-acct:focus-within .cfg-card-ic{transform:translateY(-2px);}
+
+/* hierarquia dos campos: labels em small-caps discretas,
+   inputs como uma unidade visual (mesma altura/raio/base) */
+#configuracoesPage .cfg-card-acct .cfg-form{gap:14px;}
+#configuracoesPage .cfg-card-acct .cfg-form .field label{
+  font-size:11px;font-weight:600;text-transform:uppercase;
+  letter-spacing:.7px;color:var(--text-faint-strong);margin-bottom:7px;
+}
+#configuracoesPage .cfg-card-acct .cfg-form .field input[type="text"],
+#configuracoesPage .cfg-card-acct .cfg-form .field input[type="email"],
+#configuracoesPage .cfg-card-acct .cfg-form .field input[type="password"]{
+  min-height:44px;border-radius:10px;background:#0c1119;
+  transition:border-color .2s ease, box-shadow .2s ease, transform .15s ease;
+}
+
+/* botão integrado: mesma altura/raio dos campos, sombra contida */
+#configuracoesPage .cfg-card-acct .cfg-submit{
+  border-radius:10px;min-height:44px;
+  box-shadow:0 6px 16px -12px rgba(10,132,255,0.6);
+}
+#configuracoesPage .cfg-card-acct .cfg-submit:hover:not(:disabled){
+  filter:brightness(1.07);transform:translateY(-1px);
+}
+
+/* linha informativa do e-mail atual (nunca é input) */
+#configuracoesPage .cfg-acct-line{
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:10px 12px;border:1px solid var(--border-soft);
+  border-radius:var(--cfg-radius-sm);background:rgba(255,255,255,0.02);
+}
+#configuracoesPage .cfg-acct-line-label{
+  font-size:10.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.8px;color:var(--accent);
+  display:inline-flex;align-items:center;gap:6px;
+}
+#configuracoesPage .cfg-acct-line-label::before{
+  content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--accent);opacity:.85;
+}
+#configuracoesPage .cfg-acct-line-value{
+  font-family:'Space Grotesk',sans-serif;font-size:13.5px;font-weight:700;
+  color:var(--text);word-break:break-word;overflow-wrap:anywhere;line-height:1.35;
+}
+
+/* ============================================
+   FORMULÁRIOS (senha e e-mail no mesmo sistema)
+   ============================================ */
+#configuracoesPage .cfg-form{display:flex;flex-direction:column;gap:14px;min-width:0;}
+#configuracoesPage .cfg-form .field{margin-bottom:0;min-width:0;}
+#configuracoesPage .cfg-form-row{display:grid;grid-template-columns:1fr;gap:14px 16px;min-width:0;}
+
+/* campos levemente afundados para dar profundidade sobre o card */
+#configuracoesPage .cfg-form .field input[type="text"],
+#configuracoesPage .cfg-form .field input[type="email"],
+#configuracoesPage .cfg-form .field input[type="password"]{
+  background:#0e131b;border-color:var(--cfg-border);
+}
+#configuracoesPage .cfg-form .field input:hover{border-color:#2c3543;}
+
+/* mensagens */
+#configuracoesPage .cfg-note{
+  font-size:13px;line-height:1.55;border-radius:var(--cfg-radius-sm);
+  padding:11px 14px;margin:0;
+}
+#configuracoesPage .cfg-note-success{
+  color:var(--up);background:rgba(61,220,132,0.08);border:1px solid rgba(61,220,132,0.30);
+}
+#configuracoesPage .cfg-form-error{
+  font-size:12.5px;line-height:1.5;color:#ffb3c0;
+  background:rgba(255,92,122,0.08);border:1px solid rgba(255,92,122,0.30);
+  border-radius:var(--cfg-radius-sm);padding:10px 14px;margin:0;
+}
+
+/* pendência de troca de e-mail */
+#configuracoesPage .cfg-pending{
+  border:1px solid rgba(34,200,245,0.28);background:rgba(34,200,245,0.07);
+  border-radius:var(--cfg-radius-sm);padding:13px 15px;margin:0;
+}
+#configuracoesPage .cfg-pending-label{
+  display:block;font-size:11px;font-weight:600;color:var(--accent);
+  text-transform:uppercase;letter-spacing:0.8px;margin-bottom:5px;
+}
+#configuracoesPage .cfg-pending-value{
+  display:block;font-family:'Space Grotesk',sans-serif;font-size:14.5px;font-weight:700;
+  color:var(--text);word-break:break-word;overflow-wrap:anywhere;
+}
+#configuracoesPage .cfg-pending-note{margin:8px 0 0;font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+
+/* botão integrado ao formulário */
+#configuracoesPage .cfg-form-actions{display:flex;min-width:0;}
+#configuracoesPage .cfg-submit{
+  width:100%;min-height:46px;justify-content:center;
+  background:var(--accent-grad);color:#04121a;border:none;cursor:pointer;
+  font-weight:700;font-size:14px;font-family:'Inter',sans-serif;
+  padding:11px 22px;border-radius:var(--cfg-radius-sm);
+  box-shadow:0 8px 20px -12px rgba(10,132,255,0.55);
+  transition:filter .2s ease,opacity .2s ease,transform .15s var(--cfg-ease);
+  display:inline-flex;align-items:center;gap:8px;
+}
+#configuracoesPage .cfg-submit:hover:not(:disabled){filter:brightness(1.06);}
+#configuracoesPage .cfg-submit:active:not(:disabled){transform:scale(.98);}
+#configuracoesPage .cfg-submit:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#configuracoesPage .cfg-submit:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;}
+
+/* desktop largo: formulário horizontal, botão ao lado dos campos */
+@media(min-width:1100px){
+  #configuracoesPage .cfg-row-pass{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto;}
+  #configuracoesPage .cfg-row-email{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) auto;}
+  #configuracoesPage .cfg-form-actions{align-self:end;}
+  #configuracoesPage .cfg-submit{width:auto;min-width:170px;}
+}
+/* 768–1099: senha em 2 colunas (botão fecha a segunda linha, à direita);
+   e-mail mantém as 3 células na mesma linha */
+@media(min-width:761px) and (max-width:1099px){
+  #configuracoesPage .cfg-row-pass{grid-template-columns:repeat(2,minmax(0,1fr));}
+  #configuracoesPage .cfg-row-pass .cfg-form-actions{grid-column:1 / -1;justify-content:flex-end;align-self:end;}
+  #configuracoesPage .cfg-row-email{grid-template-columns:minmax(0,1.15fr) minmax(0,1fr) auto;}
+  #configuracoesPage .cfg-row-email .cfg-form-actions{align-self:end;}
+  #configuracoesPage .cfg-submit{width:auto;min-width:170px;}
+}
+
+/* ============================================
+   SEGURANÇA — FAIXA KPI COMPACTA
+   ============================================ */
+#configuracoesPage .cfg-card-kpi{padding:18px var(--cfg-pad) 20px;gap:0;}
+#configuracoesPage .cfg-kpi-top{display:flex;align-items:center;gap:10px;margin-bottom:14px;min-width:0;}
+#configuracoesPage .cfg-kpi-heading{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:'Inter',sans-serif;font-size:11.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.6px;color:var(--text-faint-strong);
+}
+#configuracoesPage .cfg-kpi-heading svg{width:15px;height:15px;stroke:var(--accent);fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+
+#configuracoesPage .cfg-kpi-strip{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+  margin:0;list-style:none;
+}
+#configuracoesPage .cfg-kpi{min-width:0;padding:2px 22px;}
+#configuracoesPage .cfg-kpi:first-child{padding-left:0;}
+#configuracoesPage .cfg-kpi + .cfg-kpi{border-left:1px solid var(--cfg-border-soft);}
+#configuracoesPage .cfg-kpi dt{
+  font-size:10.5px;font-weight:600;color:var(--text-faint-strong);
+  text-transform:uppercase;letter-spacing:.6px;margin-bottom:5px;
+}
+#configuracoesPage .cfg-kpi dd{
+  margin:0;font-family:'Space Grotesk',sans-serif;font-size:15px;font-weight:700;color:var(--text);
+  line-height:1.35;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  font-variant-numeric:tabular-nums;
+}
+
+/* badge de verificação no topo da faixa */
+#configuracoesPage .dbv-ov-verified{margin-left:auto;flex-shrink:0;line-height:1;}
+#configuracoesPage .dbv-ov-verified:empty{display:none;}
+
+/* badges (verificação / dispositivo atual) */
+#configuracoesPage .dbv-sec-badge{
+  display:inline-flex;align-items:center;gap:5px;
+  font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+  border-radius:100px;padding:4px 10px;white-space:nowrap;
+}
+#configuracoesPage .dbv-sec-badge.is-ok{
+  color:var(--up);border:1px solid rgba(61,220,132,0.35);
+  background:rgba(61,220,132,0.10);
+}
+#configuracoesPage .dbv-sec-badge.is-warn{
+  color:var(--down);border:1px solid rgba(255,92,122,0.35);
+  background:rgba(255,92,122,0.10);
+}
+#configuracoesPage .dbv-sec-badge.is-current{
+  color:var(--accent);border:1px solid rgba(34,200,245,0.35);
+  background:rgba(34,200,245,0.12);
+}
+
+/* ============================================
+   ESTADOS loading / empty / error (compactos)
+   ============================================ */
+#configuracoesPage .dbv-chart-state{
+  display:none;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;padding:26px 14px;color:var(--text-dim);font-size:13.5px;line-height:1.6;gap:6px;
+}
+#configuracoesPage .dbv-chart-state.show{display:flex;animation:dbvFadeIn .3s ease both;}
+#configuracoesPage .dbv-chart-state .verify-spinner{margin-bottom:10px;}
+#configuracoesPage .dbv-chart-state .btn{margin-top:10px;font-size:13px;}
+#configuracoesPage .dbv-chart-state[role="alert"] p{color:var(--down);}
+#configuracoesPage .dbv-empty-ic{
+  width:46px;height:46px;border-radius:14px;background:rgba(61,220,132,0.10);
+  border:1px solid rgba(61,220,132,0.20);
+  display:flex;align-items:center;justify-content:center;margin-bottom:10px;
+}
+#configuracoesPage .dbv-empty-ic svg{width:21px;height:21px;stroke:var(--up);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ============================================
+   SESSÕES ATIVAS — linhas de DISPOSITIVO
+   (1 linha por navegador/dispositivo; hairlines,
+   sem cards pesados; ação alinhada à direita)
+   ============================================ */
+#configuracoesPage .dbv-sec-sessions{
+  display:flex;flex-direction:column;
+  margin:0;padding:0;list-style:none;min-width:0;
+}
+#configuracoesPage .dbv-sec-session{
+  display:flex;gap:14px;align-items:center;
+  padding:16px 10px;border-radius:12px;min-width:0;
+  background:transparent;border:0;
+  border-bottom:1px solid var(--cfg-border-soft);
+  transition:background .2s ease;
+  animation:dbvFadeUp .3s var(--cfg-ease) both;
+}
+#configuracoesPage .dbv-sec-session:last-child{border-bottom:0;}
+#configuracoesPage .dbv-sec-session:hover{background:rgba(255,255,255,0.025);}
+#configuracoesPage .dbv-sec-session.is-current{
+  background:rgba(34,200,245,0.05);
+}
+#configuracoesPage .dbv-sec-session.is-current:hover{background:rgba(34,200,245,0.07);}
+#configuracoesPage .dbv-sec-session-ic{
+  width:38px;height:38px;border-radius:var(--cfg-radius-sm);flex-shrink:0;
+  background:rgba(34,200,245,0.10);border:1px solid rgba(34,200,245,0.24);
+  display:flex;align-items:center;justify-content:center;color:var(--accent);
+}
+#configuracoesPage .dbv-sec-session.is-current .dbv-sec-session-ic{background:rgba(34,200,245,0.15);}
+#configuracoesPage .dbv-sec-session-ic svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+#configuracoesPage .dbv-sec-session-body{flex:1;min-width:0;}
+#configuracoesPage .dbv-sec-session-title{
+  font-size:13.5px;font-weight:600;color:var(--text);
+}
+#configuracoesPage .dbv-sec-session-sub{
+  font-size:11.5px;color:var(--text-faint-strong);margin-top:3px;
+  line-height:1.5;word-break:break-word;
+}
+#configuracoesPage .dbv-sec-session-meta{
+  display:flex;flex-wrap:wrap;gap:4px 14px;margin-top:7px;
+  font-size:11px;color:var(--text-faint-strong);
+}
+#configuracoesPage .dbv-sec-session-meta b{color:var(--text-dim);font-weight:600;font-variant-numeric:tabular-nums;}
+#configuracoesPage .dbv-sec-session-count{
+  margin-top:7px;display:inline-flex;align-items:center;gap:6px;
+  font-size:11.5px;font-weight:600;color:var(--text-dim);
+}
+#configuracoesPage .dbv-sec-session-count::before{
+  content:'';width:5px;height:5px;border-radius:50%;flex-shrink:0;
+  background:var(--accent);opacity:.8;
+}
+#configuracoesPage .dbv-sec-session-actions{flex-shrink:0;align-self:center;}
+#configuracoesPage .dbv-sec-session-out{
+  font-size:12.5px;padding:8px 14px;color:var(--down);border-color:rgba(255,92,122,0.28);
+}
+#configuracoesPage .dbv-sec-session-out:hover{color:var(--down);border-color:rgba(255,92,122,0.55);background:rgba(255,92,122,0.07);}
+#configuracoesPage .dbv-sec-session-out:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+
+/* sair de todos os outros dispositivos */
+#configuracoesPage .dbv-sec-revoke-all{
+  width:100%;justify-content:center;
+  padding:11px;font-size:13px;
+  color:var(--text-dim);border-color:var(--cfg-border);
+}
+#configuracoesPage .dbv-sec-revoke-all:hover{color:var(--text);border-color:var(--text-faint);}
+#configuracoesPage .dbv-sec-revoke-all svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ============================================
+   HISTÓRICO DE ACESSOS — lista compacta + paginação
+   ============================================ */
+#configuracoesPage .dbv-sec-logins{
+  display:flex;flex-direction:column;gap:2px;
+  margin:0;padding:0;list-style:none;min-width:0;
+}
+#configuracoesPage .dbv-sec-login{
+  display:flex;gap:12px;align-items:flex-start;
+  padding:11px 10px;border-radius:10px;min-width:0;
+  transition:background .2s ease;
+  animation:dbvFadeUp .3s var(--cfg-ease) both;
+}
+#configuracoesPage .dbv-sec-login:not(:last-child){border-bottom:1px solid var(--cfg-border-soft);}
+#configuracoesPage .dbv-sec-login:hover{background:rgba(255,255,255,0.025);}
+#configuracoesPage .dbv-sec-login-ic{
+  width:34px;height:34px;border-radius:11px;flex-shrink:0;
+  background:rgba(61,220,132,0.09);border:1px solid rgba(61,220,132,0.20);
+  display:flex;align-items:center;justify-content:center;color:var(--up);
+}
+#configuracoesPage .dbv-sec-login-ic svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+#configuracoesPage .dbv-sec-login-body{flex:1;min-width:0;}
+#configuracoesPage .dbv-sec-login-title{font-size:13px;font-weight:600;color:var(--text);}
+#configuracoesPage .dbv-sec-login-sub{
+  font-size:11.5px;color:var(--text-faint-strong);margin-top:2px;
+  line-height:1.45;word-break:break-word;
+}
+#configuracoesPage .dbv-sec-login-side{flex-shrink:0;text-align:right;}
+#configuracoesPage .dbv-sec-login-date{font-size:12px;font-weight:600;color:var(--text-dim);font-variant-numeric:tabular-nums;white-space:nowrap;}
+#configuracoesPage .dbv-sec-login-ip{font-size:11px;color:var(--text-faint-strong);margin-top:3px;font-variant-numeric:tabular-nums;white-space:nowrap;}
+
+/* paginação */
+#configuracoesPage .dbv-sec-pager{
+  display:flex;align-items:center;justify-content:center;gap:12px;
+  padding-top:14px;border-top:1px solid var(--cfg-border-soft);
+}
+#configuracoesPage .dbv-sec-pager .pager-btn{
+  background:rgba(255,255,255,0.02);border:1px solid var(--cfg-border);
+  border-radius:100px;padding:8px 16px;font-size:12.5px;color:var(--text-dim);
+  cursor:pointer;transition:.2s;
+}
+#configuracoesPage .dbv-sec-pager .pager-btn:hover:not(:disabled){background:rgba(255,255,255,0.05);color:var(--text);}
+#configuracoesPage .dbv-sec-pager .pager-btn:disabled{opacity:.4;cursor:not-allowed;}
+#configuracoesPage .dbv-sec-pager .pager-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#configuracoesPage .stmt-pageinfo{
+  font-size:12px;color:var(--text-faint-strong);
+  font-variant-numeric:tabular-nums;white-space:nowrap;
+}
+
+/* keyframes locais (mesmos nomes da dashboard) */
+@keyframes dbvFadeUp{from{opacity:0;transform:translateY(12px);}to{opacity:1;transform:translateY(0);}}
+@keyframes dbvFadeIn{from{opacity:0;}to{opacity:1;}}
+
+/* ============================================
+   MODAL DE CONFIRMAÇÃO (acessível)
+   ============================================ */
+#configuracoesPage .dbv-modal{
+  position:fixed;inset:0;z-index:400;
+  display:flex;align-items:center;justify-content:center;padding:20px;
+}
+#configuracoesPage .dbv-modal-backdrop{
+  position:absolute;inset:0;background:rgba(3,8,14,0.72);
+  -webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);
+  opacity:0;transition:opacity .25s ease;
+}
+#configuracoesPage .dbv-modal:not([hidden])>.dbv-modal-backdrop{opacity:1;}
+#configuracoesPage .dbv-modal-panel{
+  position:relative;width:100%;max-width:452px;
+  background:linear-gradient(180deg,#141b28 0%,#0d1119 100%);
+  border:1px solid var(--cfg-border);border-radius:22px;
+  padding:26px 26px 22px;margin:auto;
+  box-shadow:0 40px 80px -32px rgba(0,0,0,0.75);
+  transform:translateY(10px) scale(.98);opacity:0;
+  transition:transform .25s var(--cfg-ease),opacity .25s ease;
+}
+#configuracoesPage .dbv-modal:not([hidden])>.dbv-modal-panel{transform:none;opacity:1;}
+#configuracoesPage .dbv-modal-x{
+  position:absolute;top:16px;right:16px;width:34px;height:34px;border-radius:10px;
+  background:rgba(255,255,255,0.03);border:1px solid var(--cfg-border-soft);
+  color:var(--text-dim);cursor:pointer;display:flex;align-items:center;justify-content:center;
+  transition:color .2s ease,border-color .2s ease;
+}
+#configuracoesPage .dbv-modal-x svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+#configuracoesPage .dbv-modal-x:hover{color:var(--text);border-color:var(--text-faint);}
+#configuracoesPage .dbv-modal-x:focus-visible,
+#configuracoesPage .dbv-modal-cancel:focus-visible,
+#configuracoesPage .dbv-modal-confirm:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#configuracoesPage .dbv-modal-eyebrow{font-size:11px;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+#configuracoesPage .dbv-modal-title{
+  font-family:'Space Grotesk',sans-serif;font-size:21px;line-height:1.25;letter-spacing:-.4px;
+  color:var(--text);margin:0 0 8px;
+}
+#configuracoesPage .dbv-modal-desc{font-size:13px;line-height:1.6;color:var(--text-dim);margin:0 0 18px;}
+#configuracoesPage .dbv-modal-desc b{color:var(--text);letter-spacing:.2px;}
+#configuracoesPage .dbv-modal-summary{
+  margin:0 0 18px;border:1px solid var(--cfg-border-soft);border-radius:16px;
+  overflow:hidden;background:rgba(9,11,15,0.35);
+}
+#configuracoesPage .dbv-ms-row{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:12px 16px;border-top:1px solid var(--cfg-border-soft);
+}
+#configuracoesPage .dbv-ms-row:first-child{border-top:0;}
+#configuracoesPage .dbv-ms-row dt{font-size:12.5px;color:var(--text-faint-strong);}
+#configuracoesPage .dbv-ms-row dd{
+  margin:0;font-size:13.5px;font-weight:700;color:var(--text);
+  font-variant-numeric:tabular-nums;
+}
+#configuracoesPage .dbv-modal-err{
+  font-size:12.5px;line-height:1.5;color:#ffb3c0;
+  background:rgba(255,92,122,0.08);border:1px solid rgba(255,92,122,0.3);
+  border-radius:12px;padding:10px 14px;margin:0 0 16px;
+}
+#configuracoesPage .dbv-modal-actions{display:flex;gap:10px;}
+#configuracoesPage .dbv-modal-cancel{
+  flex:1;background:rgba(255,255,255,0.04);border:1px solid var(--cfg-border);
+  color:var(--text-dim);cursor:pointer;font-weight:600;font-family:'Inter',sans-serif;
+  padding:12px 16px;border-radius:100px;
+  transition:color .2s ease,border-color .2s ease,opacity .2s ease;
+}
+#configuracoesPage .dbv-modal-cancel:hover{color:var(--text);border-color:var(--text-faint);}
+#configuracoesPage .dbv-modal-cancel:disabled{opacity:.5;cursor:not-allowed;}
+#configuracoesPage .dbv-modal-confirm{
+  flex:1.3;justify-content:center;background:var(--accent-grad);color:#04121a;border:none;
+  cursor:pointer;font-weight:700;font-family:'Inter',sans-serif;
+  padding:12px 16px;border-radius:100px;
+  box-shadow:0 8px 20px -12px rgba(10,132,255,0.55);
+  transition:filter .2s ease,opacity .2s ease;
+  display:inline-flex;align-items:center;
+}
+#configuracoesPage .dbv-modal-confirm:hover{filter:brightness(1.06);}
+#configuracoesPage .dbv-modal-confirm:disabled{opacity:.55;cursor:not-allowed;box-shadow:none;}
+
+/* ============================================
+   ALERTAS CONFIGURÁVEIS (Lote 1)
+   ============================================ */
+#configuracoesPage .cfg-alerts-card{gap:0;}
+#configuracoesPage .cfg-alert-list{
+  display:flex;flex-direction:column;
+  list-style:none;margin:0;padding:0;min-width:0;
+}
+#configuracoesPage .cfg-alert-sep{
+  padding:14px 0 8px;font-size:10.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:1.4px;color:var(--accent);
+}
+#configuracoesPage .cfg-alert-sep:not(:first-child){border-top:1px solid var(--border-soft);margin-top:6px;}
+#configuracoesPage .cfg-alert-row{
+  display:flex;align-items:center;gap:16px;min-width:0;
+  padding:13px 10px;border-radius:12px;border-bottom:1px solid var(--border-soft);
+  transition:background .2s ease;
+}
+#metasPage #metList .met-goal,
+#configuracoesPage .cfg-alert-row:last-child{border-bottom:0;}
+#configuracoesPage .cfg-alert-row:hover{background:rgba(255,255,255,0.02);}
+#configuracoesPage .cfg-alert-info{flex:1;min-width:0;display:flex;flex-direction:column;gap:3px;}
+#configuracoesPage .cfg-alert-label{font-size:13.5px;font-weight:600;color:var(--text);}
+#configuracoesPage .cfg-alert-desc{font-size:11.5px;color:var(--text-faint-strong);line-height:1.5;}
+#configuracoesPage .cfg-alert-th{display:flex;align-items:center;gap:6px;margin-top:7px;}
+#configuracoesPage .cfg-alert-th input{
+  width:110px;background:#0c1119;border:1px solid var(--border);border-radius:8px;
+  color:var(--text);font-size:12.5px;padding:6px 9px;font-variant-numeric:tabular-nums;
+  transition:border-color .2s ease;
+}
+#configuracoesPage .cfg-alert-th input:focus{
+  outline:none;border-color:var(--accent);
+  box-shadow:0 0 0 3px rgba(34,200,245,0.14);
+}
+#configuracoesPage .cfg-alert-th-cur{font-size:11px;color:var(--text-faint-strong);}
+#configuracoesPage .cfg-alert-switch{
+  position:relative;width:42px;height:24px;border-radius:100px;flex-shrink:0;cursor:pointer;
+  background:#232b38;border:1px solid var(--border);
+  transition:background .2s ease,border-color .2s ease;
+}
+#configuracoesPage .cfg-alert-switch:hover{border-color:var(--text-faint);}
+#configuracoesPage .cfg-alert-switch.is-on{background:rgba(34,200,245,0.35);border-color:rgba(34,200,245,0.55);}
+#configuracoesPage .cfg-alert-switch:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#configuracoesPage .cfg-alert-knob{
+  position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;
+  background:#f2f5f9;transition:transform .2s var(--cfg-ease), background .2s ease;
+  box-shadow:0 1px 3px rgba(0,0,0,0.4);
+}
+#configuracoesPage .cfg-alert-switch.is-on .cfg-alert-knob{
+  transform:translateX(18px);
+  background:linear-gradient(135deg,#3ee8ff,#0a84ff);
+}
+#configuracoesPage .cfg-alert-switch:disabled{opacity:.5;cursor:wait;}
+#configuracoesPage .cfg-alert-note{
+  margin:14px 0 0;font-size:11.5px;color:var(--text-faint-strong);line-height:1.5;
+}
+#configuracoesPage .cfg-alert-feedback{
+  margin:12px 0 0;font-size:12.5px;color:var(--up);
+  background:rgba(61,220,132,0.08);border:1px solid rgba(61,220,132,0.30);
+  border-radius:12px;padding:10px 14px;
+}
+#configuracoesPage .cfg-alert-feedback.is-error{color:#ffb3c0;background:rgba(255,92,122,0.08);border-color:rgba(255,92,122,0.30);}
+
+/* ============================================
+   FOOTER
+   ============================================ */
+#configuracoesPage .cfg-footer{
+  margin-top:auto;position:relative;
+  border-top:1px solid var(--border-soft);
+  background:linear-gradient(180deg, rgba(15,19,26,0.55), rgba(9,11,15,0.65));
+  padding:clamp(34px,4.5vw,52px) 24px 26px;
+}
+#configuracoesPage .cfg-foot-grid{
+  display:grid;grid-template-columns:1.5fr repeat(3,1fr);gap:30px;
+  max-width:1120px;margin:0 auto;width:100%;margin-bottom:38px;
+}
+#configuracoesPage .cfg-foot-grid > *{min-width:0;}
+#configuracoesPage .cfg-foot-brand p{color:var(--text-dim);font-size:13.5px;margin-top:14px;max-width:260px;line-height:1.6;}
+#configuracoesPage .cfg-foot-col h5{
+  font-family:'Inter',sans-serif;font-size:11px;color:var(--text-faint-strong);
+  text-transform:uppercase;letter-spacing:1px;margin-bottom:16px;
+}
+#configuracoesPage .cfg-foot-col a{display:block;font-size:13.5px;color:var(--text-dim);margin-bottom:11px;line-height:1.5;}
+#configuracoesPage .cfg-foot-col a:hover{color:var(--text);}
+#configuracoesPage .cfg-foot-contact a{color:var(--accent);word-break:break-all;}
+#configuracoesPage .cfg-foot-contact a:hover{color:var(--text);}
+#configuracoesPage .cfg-foot-bottom{
+  display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;
+  max-width:1120px;margin:0 auto;width:100%;
+  border-top:1px solid var(--border-soft);padding-top:22px;
+  font-size:12.5px;color:var(--text-faint-strong);
+}
+
+/* ============================================
+   RESPONSIVIDADE
+   ============================================ */
+@media(max-width:900px){
+  #configuracoesPage .cfg-foot-grid{grid-template-columns:repeat(2,1fr);gap:26px;}
+}
+@media(max-width:760px){
+  #configuracoesPage .cfg-card-head{flex-wrap:wrap;}
+  /* sessão/histórico quebram em bloco */
+  #configuracoesPage .dbv-sec-session{flex-wrap:wrap;}
+  #configuracoesPage .dbv-sec-session-actions{width:100%;justify-content:center;}
+  #configuracoesPage .dbv-sec-session-out{flex:1;justify-content:center;}
+  #configuracoesPage .dbv-sec-session-actions .dbv-sec-badge{margin-inline:auto;}
+  #configuracoesPage .dbv-sec-login{flex-wrap:wrap;}
+  #configuracoesPage .dbv-sec-login-side{text-align:left;width:100%;padding-left:46px;}
+  #configuracoesPage .dbv-sec-login-date{white-space:normal;overflow-wrap:anywhere;}
+}
+@media(max-width:719px){
+  /* faixa KPI empilha com divisores horizontais */
+  #configuracoesPage .cfg-kpi-strip{grid-template-columns:1fr;}
+  #configuracoesPage .cfg-kpi{padding:10px 0;}
+  #configuracoesPage .cfg-kpi:first-child{padding-top:2px;}
+  #configuracoesPage .cfg-kpi + .cfg-kpi{border-left:0;border-top:1px solid var(--cfg-border-soft);}
+  #configuracoesPage .cfg-kpi dd{white-space:normal;overflow-wrap:anywhere;}
+}
+@media(max-width:640px){
+  #configuracoesPage .cfg-main{padding:34px 20px 76px;}
+  #configuracoesPage .cfg-group + .cfg-group{margin-top:34px;}
+  #configuracoesPage .cfg-hero{margin-bottom:30px;padding-bottom:20px;}
+  #configuracoesPage .cfg-card{padding:20px;}
+  #configuracoesPage .cfg-card-kpi{padding:16px 20px 18px;}
+  #configuracoesPage .cfg-card-acct{padding:20px 18px;}
+}
+@media(max-width:560px){
+  #configuracoesPage .dbv-sec-pager{flex-wrap:wrap;}
+  #configuracoesPage .dbv-modal{padding:14px;}
+  #configuracoesPage .dbv-modal-panel{padding:22px 18px 18px;max-height:calc(100vh - 28px);overflow-y:auto;overscroll-behavior:contain;}
+  #configuracoesPage .dbv-modal-title{font-size:19px;}
+  #configuracoesPage .dbv-modal-actions{flex-direction:column-reverse;}
+}
+@media(max-width:520px){
+  #configuracoesPage .cfg-header{padding:14px 20px;gap:14px;}
+  #configuracoesPage .cfg-user-name{display:none;}
+  #configuracoesPage .cfg-head-right{gap:10px;}
+  #configuracoesPage .cfg-head-actions{gap:8px;}
+  #configuracoesPage .cfg-foot-grid{grid-template-columns:1fr;gap:22px;margin-bottom:30px;}
+  #configuracoesPage .cfg-footer{padding:28px 20px 22px;}
+}
+
+/* HEADER MOBILE COMPACTO (360 / 390 / 430)
+   Botões viram ícones (texto preservado via aria-label),
+   área de toque ≥40px, header mais baixo e respirado. */
+@media(max-width:430px){
+  #configuracoesPage .cfg-header{padding:12px 16px;gap:10px;}
+  #configuracoesPage .cfg-logo{font-size:19px;gap:8px;}
+  #configuracoesPage .cfg-logo .logo-mark{width:22px;height:22px;border-radius:8px;}
+  #configuracoesPage .cfg-user-avatar{width:30px;height:30px;font-size:12px;}
+  #configuracoesPage .cfg-head-right{gap:8px;}
+  #configuracoesPage .cfg-head-actions{gap:6px;}
+  #configuracoesPage .cfg-head-btn{
+    width:40px;height:40px;padding:0;
+    justify-content:center;border-radius:12px;
+  }
+  #configuracoesPage .cfg-head-btn span{display:none;}
+  #configuracoesPage .cfg-head-btn svg{width:17px;height:17px;}
+}
+
+/* reduzir movimento */
+@media(prefers-reduced-motion:reduce){
+  #configuracoesPage *,#configuracoesPage *::before,#configuracoesPage *::after{
+    animation:none !important;transition:none !important;
+  }
+}

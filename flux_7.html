@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flux · O próximo movimento é seu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<!-- ===== INTRO / BOOT LOGO ===== -->
+<div class="boot" id="boot" aria-hidden="true">
+  <div class="boot-glow" aria-hidden="true"></div>
+  <div class="boot-burst" aria-hidden="true"></div>
+  <div class="boot-logo" id="bootLogo">
+    <span class="boot-mark" id="bootMark" aria-hidden="true"></span>
+    <span class="boot-flux" id="bootFlux">FLUX</span>
+  </div>
+</div>
+<div class="scroll-progress" id="scrollProgress"></div>
+<div class="bg-grid"></div>
+
+<header>
+  <nav>
+    <div class="logo"><span class="logo-mark"></span>FLUX</div>
+    <div class="nav-links">
+      <a href="#funcionalidades">Recursos</a>
+      <a href="#app">Como funciona</a>
+      <a href="#seguranca">Segurança</a>
+      <a href="#why">Sobre</a>
+    </div>
+    <div class="nav-actions">
+      <a href="cadastro_1.html" class="btn btn-ghost">Abra sua conta</a>
+      <a href="login.html" class="btn btn-primary">Entrar</a>
+    </div>
+    <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="navMenu" aria-label="Abrir menu">
+      <span></span><span></span><span></span>
+    </button>
+    <div class="nav-menu" id="navMenu">
+      <a href="#funcionalidades">Recursos</a>
+      <a href="#app">Como funciona</a>
+      <a href="#seguranca">Segurança</a>
+      <a href="#why">Sobre</a>
+      <a href="login.html" class="btn btn-ghost">Entrar</a>
+      <a href="cadastro_1.html" class="btn btn-primary">Abra sua conta</a>
+    </div>
+  </nav>
+</header>
+
+<!-- HERO -->
+<main id="main-content" tabindex="-1">
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <h1><span class="line-mask"><span class="line-inner">O próximo</span></span><span class="line-mask"><span class="line-inner">movimento é</span></span><span class="line-mask"><span class="line-inner accent-text">seu.</span></span></h1>
+      <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      <div class="hero-actions">
+        <a href="cadastro_1.html" class="btn btn-primary btn-lg">Começar agora</a>
+        <a href="#funcionalidades" class="link-secondary">Ver recursos →</a>
+      </div>
+    </div>
+    <div class="hero-visual">
+      <div class="orb"></div>
+      <div class="orb-2"></div>
+      <div class="hero-comp" id="heroComp">
+      <div class="hero-toast">
+        <div class="ht-ic"><svg viewBox="0 0 24 24"><path d="M8 4 4 8l4 4M16 20l4-4-4-4"/><path d="M4 8h5.5a3.5 3.5 0 0 1 2.47 1.02l1.06 1.06M20 16h-5.5a3.5 3.5 0 0 1-2.47-1.02l-1.06-1.06"/></svg></div>
+        <div><div class="ht-title">Pix recebido</div><div class="ht-sub">+R$ 85,00</div></div>
+      </div>
+      <div class="hero-card">
+        <div class="chip"></div>
+        <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="#c7cfda" stroke-width="1.6"><path d="M2 12a10 10 0 0 1 3-7M6 12a6 6 0 0 1 2-4.5M22 12a10 10 0 0 0-3-7M18 12a6 6 0 0 0-2-4.5"/></svg>
+        <div class="cardlogo">FLUX</div>
+        <div class="cardnum">•••• •••• •••• 4127</div>
+        <div class="cardname">Alan Ferreira</div>
+        <div class="cardtype">Black</div>
+      </div>
+      <div class="hero-phone">
+        <div class="screen">
+          <div class="status-row"><div class="avatar"></div><div class="bell"></div></div>
+          <div class="bal-label">Saldo disponível</div>
+          <div class="bal" id="heroBalVal" data-count="4250.80" data-decimals="2">R$ 4.250,80</div>
+          <div class="pill-row">
+            <div class="pill"><svg viewBox="0 0 24 24"><path d="M8 4 4 8l4 4M16 20l4-4-4-4"/><path d="M4 8h5.5a3.5 3.5 0 0 1 2.47 1.02l1.06 1.06M20 16h-5.5a3.5 3.5 0 0 1-2.47-1.02l-1.06-1.06"/></svg><span>Pix</span></div>
+            <div class="pill"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/></svg><span>Cartão</span></div>
+            <div class="pill"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><span>Pagar</span></div>
+          </div>
+          <div class="mv-title">ÚLTIMAS MOVIMENTAÇÕES</div>
+          <div class="hmv" data-reveal="left">
+            <div class="hmv-left"><div class="hmv-ic"></div><div><div class="hmv-name">Pix recebido</div><div class="hmv-sub">Hoje, 09:42</div></div></div>
+            <div class="hmv-val" style="color:var(--up);">+R$ 85,00</div>
+          </div>
+          <div class="hmv" data-reveal="left">
+            <div class="hmv-left"><div class="hmv-ic"></div><div><div class="hmv-name">Academia</div><div class="hmv-sub">Ontem, 18:10</div></div></div>
+            <div class="hmv-val" style="color:var(--down);">-R$ 64,50</div>
+          </div>
+          <div class="hmv" data-reveal="left">
+            <div class="hmv-left"><div class="hmv-ic"></div><div><div class="hmv-name">Assinatura</div><div class="hmv-sub">Ontem, 07:00</div></div></div>
+            <div class="hmv-val" style="color:var(--down);">-R$ 39,90</div>
+          </div>
+        </div>
+      </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FUNCIONALIDADES -->
+<section class="features" id="funcionalidades">
+  <div class="wrap">
+    <div class="sec-head center" style="margin-left:auto;margin-right:auto;">
+      <div class="eyebrow" style="justify-content:center;" data-reveal="fade">Funcionalidades</div>
+      <h2 data-reveal="up">Mais que um banco.<br>Seu banco.</h2>
+    </div>
+    <div class="feat-grid">
+      <div class="feat-card" data-reveal="scale">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M8 4 4 8l4 4M16 20l4-4-4-4"/><path d="M4 8h5.5a3.5 3.5 0 0 1 2.47 1.02l1.06 1.06M20 16h-5.5a3.5 3.5 0 0 1-2.47-1.02l-1.06-1.06"/></svg></div>
+        <h3>Pix</h3>
+        <p>Transferências instantâneas, a qualquer hora, sem tarifa e sem burocracia.</p>
+      </div>
+      <div class="feat-card" data-reveal="scale">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/><path d="M3 10h18"/><path d="M7 14.2h4"/></svg></div>
+        <h3>Cartão</h3>
+        <p>Físico e virtual, com bloqueio e ajustes de limite direto pelo app.</p>
+      </div>
+      <div class="feat-card" data-reveal="scale">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 15c0 1.1 1.1 1.7 2.7 1.7 1.8 0 2.8-.7 2.8-1.9 0-1.3-1.1-1.6-2.8-2-1.6-.4-2.6-.8-2.6-2 0-1.1 1-1.8 2.6-1.8 1.5 0 2.5.6 2.6 1.6"/></svg></div>
+        <h3>Empréstimos</h3>
+        <p>Simule e contrate em minutos, com taxas claras desde o início.</p>
+      </div>
+      <div class="feat-card" data-reveal="scale">
+        <div class="feat-icon"><svg viewBox="0 0 24 24"><path d="M4 19V10M10 19V5M16 19v-7M20 19V9"/><path d="M4 19h16"/></svg></div>
+        <h3>Controle financeiro</h3>
+        <p>Receitas, despesas e saldo organizados automaticamente para você.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CARTÃO FLUX -->
+<section class="card-section">
+  <div class="wrap card-grid">
+    <div class="card-3d-wrap" data-reveal="scale">
+      <div class="card-3d" id="tiltCard">
+        <div class="chip"></div>
+        <svg class="wave" viewBox="0 0 24 24" fill="none" stroke="#c7cfda" stroke-width="1.6"><path d="M2 12a10 10 0 0 1 3-7M6 12a6 6 0 0 1 2-4.5M22 12a10 10 0 0 0-3-7M18 12a6 6 0 0 0-2-4.5"/></svg>
+        <div class="cardlogo">FLUX</div>
+        <div class="cardnum">•••• •••• •••• 4127</div>
+        <div class="cardval">Validade 12/29</div>
+        <div class="cardname">Alan Ferreira</div>
+        <div class="cardtype">Black</div>
+      </div>
+    </div>
+    <div class="card-copy">
+      <div class="eyebrow" data-reveal="fade">O cartão Flux</div>
+      <h2 data-reveal="up">Feito para acompanhar você.</h2>
+      <p data-reveal="fade">Tenha controle, praticidade e liberdade em cada compra, física ou virtual.</p>
+      <div class="perk-list">
+        <div class="perk" data-reveal="left"><span class="dot"></span>Cartão virtual instantâneo</div>
+        <div class="perk" data-reveal="left"><span class="dot"></span>Aproximação e pagamento por NFC</div>
+        <div class="perk" data-reveal="left"><span class="dot"></span>Controle total pelo app</div>
+        <div class="perk" data-reveal="left"><span class="dot"></span>Bloqueio e desbloqueio na hora</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- APP -->
+<section class="app-section" id="app">
+  <div class="wrap">
+    <div class="sec-head center" style="margin-left:auto;margin-right:auto;">
+      <div class="eyebrow" style="justify-content:center;" data-reveal="fade">Tudo pelo app</div>
+      <h2 data-reveal="up">Sua conta inteira, na palma da mão.</h2>
+      <p data-reveal="fade">Pix, cartão e pagamentos organizados em uma interface simples e rápida.</p>
+    </div>
+    <div class="phones">
+      <div class="phone side" data-reveal="scale">
+        <div class="screen">
+          <div class="screen-top"><div class="avatar"></div><div class="bell"></div></div>
+          <div class="mini-card">
+            <div class="mc-chip"></div>
+            <div class="mc-logo">FLUX</div>
+            <div class="mc-num">•••• 4127</div>
+          </div>
+          <div class="acc-label">Limite disponível</div>
+          <div class="acc-balance">R$ 6.000,00</div>
+          <div class="toggle-row"><span>Cartão virtual</span><div class="toggle on"></div></div>
+          <div class="toggle-row"><span>Aproximação</span><div class="toggle on"></div></div>
+          <div class="toggle-row"><span>Compras online</span><div class="toggle"></div></div>
+        </div>
+      </div>
+      <div class="phone mid" data-reveal="scale">
+        <div class="screen">
+          <div class="screen-top"><div class="avatar"></div><div class="bell"></div></div>
+          <div class="acc-label">Conta</div>
+          <div class="acc-balance">R$ 4.250,80</div>
+          <div class="action-row">
+            <div class="action-pill"><div class="ic"></div>Pix</div>
+            <div class="action-pill"><div class="ic"></div>Cartão</div>
+            <div class="action-pill"><div class="ic"></div>Pagar</div>
+          </div>
+          <div class="pix-demo" data-reveal="scale">
+            <div class="pd-head">
+              <span class="pd-sub">Novo Pix</span>
+              <span class="pd-tag">Exemplo</span>
+            </div>
+            <div class="pd-value" data-count="250" data-decimals="2">R$ 250,00</div>
+            <div class="pd-rail">
+              <div class="pd-fill"></div>
+              <span class="pd-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg></span>
+            </div>
+            <div class="pd-status">
+              <span class="pd-msg-state">Enviando…</span>
+              <span class="pd-msg-done">PIX enviado</span>
+            </div>
+          </div>
+          <div class="mv-title">ÚLTIMAS MOVIMENTAÇÕES</div>
+          <div class="mv-item" data-reveal="left">
+            <div class="mv-left"><div class="mv-ic"></div><div><div class="mv-name">Pix recebido</div><div class="mv-sub">Hoje, 09:42</div></div></div>
+            <div class="mv-val up">+R$ 92,00</div>
+          </div>
+          <div class="mv-item" data-reveal="left">
+            <div class="mv-left"><div class="mv-ic"></div><div><div class="mv-name">Academia</div><div class="mv-sub">Ontem, 18:10</div></div></div>
+            <div class="mv-val down">-R$ 64,50</div>
+          </div>
+          <div class="mv-item" data-reveal="left">
+            <div class="mv-left"><div class="mv-ic"></div><div><div class="mv-name">Assinatura</div><div class="mv-sub">Ontem, 07:00</div></div></div>
+            <div class="mv-val down">-R$ 39,90</div>
+          </div>
+        </div>
+      </div>
+      <div class="phone side" data-reveal="scale">
+        <div class="screen">
+          <div class="screen-top"><div class="avatar"></div><div class="bell"></div></div>
+          <div class="acc-label">Empréstimo ativo</div>
+          <div class="acc-balance">12x R$ 480,32</div>
+          <div class="progress-bar"><div class="progress-fill"></div></div>
+          <div class="progress-caption"><span>5 de 12 parcelas pagas</span><span>42%</span></div>
+          <div class="loan-mini-row"><span>Valor contratado</span><span>R$ 5.000,00</span></div>
+          <div class="loan-mini-row"><span>Já pago</span><span>R$ 2.401,60</span></div>
+          <div class="loan-mini-row"><span>Próxima cobrança</span><span>18 set</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EMPRÉSTIMOS -->
+<section class="loans" id="emprestimos">
+  <div class="wrap loan-grid">
+    <div class="loan-copy">
+      <div class="eyebrow" data-reveal="fade">Empréstimos</div>
+      <h2 data-reveal="up">Quando você precisar, a Flux está com você.</h2>
+      <p data-reveal="fade">Simule na hora, sem consulta que suja o nome e sem letras miúdas.</p>
+      <a href="#" class="link-secondary" data-reveal="fade">Ver todas as condições →</a>
+    </div>
+    <div class="loan-sim" data-reveal="scale">
+      <div class="sim-head">
+        <span class="sim-title">Simulador</span>
+        <span class="live-tag"><span class="live-dot"></span>Cálculo em tempo real</span>
+      </div>
+      <div class="loan-row"><span>Quanto você precisa?</span></div>
+      <div class="loan-amount" id="loanAmountLabel">R$ 5.000</div>
+      <input type="range" min="500" max="20000" step="100" value="5000" id="loanSlider" aria-label="Valor desejado">
+      <div class="range-labels"><span>R$ 500</span><span>R$ 20.000</span></div>
+      <div class="installments" id="installmentGroup">
+        <button type="button" class="inst-opt" data-n="6">6x</button>
+        <button type="button" class="inst-opt active" data-n="12">12x</button>
+        <button type="button" class="inst-opt" data-n="18">18x</button>
+        <button type="button" class="inst-opt" data-n="24">24x</button>
+      </div>
+      <div class="loan-result">
+        <div class="lr-label">Parcela estimada</div>
+        <div class="lr-val" id="loanResult">12x de <span class="small">R$ 472,51</span></div>
+      </div>
+      <div class="breakdown-bar"><div class="seg-principal" id="segPrincipal" style="width:88%;"></div><div class="seg-juros"></div></div>
+      <div class="breakdown-legend">
+        <span class="leg-a">Principal <span id="legPrincipal">R$ 5.000</span></span>
+        <span class="leg-b">Juros <span id="legJuros">R$ 670,12</span></span>
+      </div>
+      <div class="stat-trio">
+        <div class="st"><div class="st-label">Total a pagar</div><div class="st-val" id="statTotal">R$ 5.670,12</div></div>
+        <div class="st"><div class="st-label">Taxa</div><div class="st-val" id="statRate">1,99% a.m.</div></div>
+        <div class="st"><div class="st-label">Aprovação</div><div class="st-val" style="color:var(--up);">Imediata</div></div>
+      </div>
+      <a href="#emprestimos" class="btn btn-primary" style="width:100%;justify-content:center;">Simular empréstimo →</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTROLE FINANCEIRO -->
+<section class="finance">
+  <div class="wrap fin-grid">
+    <div class="fin-copy">
+      <div class="eyebrow" data-reveal="fade">Controle financeiro</div>
+      <h2 data-reveal="up">Seu dinheiro. Sob seu controle.</h2>
+      <p data-reveal="fade">A Flux organiza receitas e despesas automaticamente, para você enxergar exatamente para onde seu dinheiro vai.</p>
+    </div>
+    <div class="fin-card" data-reveal="scale">
+      <div class="fin-legend">
+        <div class="fin-leg-item"><span class="sw" style="background:var(--up);"></span>Receitas</div>
+        <div class="fin-leg-item"><span class="sw" style="background:var(--down);"></span>Despesas</div>
+        <div class="fin-leg-item"><span class="sw" style="background:var(--accent);"></span>Saldo</div>
+      </div>
+      <svg viewBox="0 0 460 180" width="100%" height="180" id="finChart"></svg>
+      <div class="fin-stats">
+        <div class="fin-stat"><div class="fs-label">Receitas</div><div class="fs-val" style="color:var(--up);" data-count="5200" data-decimals="0">R$ 5.200</div></div>
+        <div class="fin-stat"><div class="fs-label">Despesas</div><div class="fs-val" style="color:var(--down);" data-count="2840" data-decimals="0">R$ 2.840</div></div>
+        <div class="fin-stat"><div class="fs-label">Saldo</div><div class="fs-val" style="color:var(--accent);" data-count="2360" data-decimals="0">R$ 2.360</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SEGURANÇA -->
+<section class="security" id="seguranca">
+  <div class="wrap">
+    <div class="sec-head center" style="margin-left:auto;margin-right:auto;">
+      <div class="eyebrow" style="justify-content:center;" data-reveal="fade">Segurança</div>
+      <h2 data-reveal="up">Seu dinheiro merece segurança.</h2>
+    </div>
+    <div class="sec-grid">
+      <div class="sec-card" data-reveal="scale"><div class="si"><svg viewBox="0 0 24 24"><rect x="5" y="10.5" width="14" height="9" rx="2"/><path d="M8 10.5V7.8a4 4 0 0 1 8 0v2.7"/></svg></div><h4>Proteção de dados</h4><p>Criptografia de ponta a ponta em todas as informações.</p></div>
+      <div class="sec-card" data-reveal="scale"><div class="si"><svg viewBox="0 0 24 24"><path d="M12 3.5 5 6.2v5.4c0 4.4 2.9 7.3 7 8.9 4.1-1.6 7-4.5 7-8.9V6.2z"/><path d="m9.3 12 1.8 1.8 3.6-3.8"/></svg></div><h4>Monitoramento</h4><p>Transações analisadas em tempo real contra fraudes.</p></div>
+      <div class="sec-card" data-reveal="scale"><div class="si"><svg viewBox="0 0 24 24"><circle cx="12" cy="8.3" r="3.2"/><path d="M5.5 19.5c0-3.3 2.9-5.8 6.5-5.8s6.5 2.5 6.5 5.8"/></svg></div><h4>Controle de acesso</h4><p>Você decide quem acessa e o que pode ser feito.</p></div>
+      <div class="sec-card" data-reveal="scale"><div class="si"><svg viewBox="0 0 24 24"><path d="M12 3.8c-3.2 0-5.9 1.6-7.5 4M12 3.8c3.2 0 5.9 1.6 7.5 4M6 9.5a7 7 0 0 1 12 0M8.3 12.2a4.4 4.4 0 0 1 7.4 0M12 14.8v1.1M12 18.5v1.7"/></svg></div><h4>Autenticação</h4><p>Biometria e dois fatores em cada login.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- POR QUE FLUX -->
+<section class="why" id="why">
+  <div class="wrap">
+    <div class="sec-head center" style="margin-left:auto;margin-right:auto;">
+      <div class="eyebrow" style="justify-content:center;" data-reveal="fade">Por que Flux</div>
+      <h2 data-reveal="up">Feita para quem não abre mão de nada.</h2>
+    </div>
+    <div class="why-grid">
+      <div class="why-card" data-reveal="scale">
+        <div class="wi"><svg viewBox="0 0 24 24"><path d="M13 3 5 13.5h5.5L11 21l8-11h-5.5z"/></svg></div>
+        <h3>Simples</h3>
+        <p>Tudo fácil de entender, sem termos complicados.</p>
+      </div>
+      <div class="why-card" data-reveal="scale">
+        <div class="wi"><svg viewBox="0 0 24 24"><path d="M13.5 5.5c3.5 0 5.5 2 5.5 5.5-2.4 0-4.4-.7-6.2-2.5M13.5 5.5c-3.5.5-6.6 3-8 6.5l3 3c3.5-1.4 6-4.5 6.5-8M13.5 5.5c-1.8-1.8-4-2.6-6.7-2M5.5 15.5c-1 1-1.4 2.7-1.2 4.2 1.5.2 3.2-.2 4.2-1.2"/></svg></div>
+        <h3>Rápido</h3>
+        <p>Resolva o que precisa em poucos toques.</p>
+      </div>
+      <div class="why-card" data-reveal="scale">
+        <div class="wi"><svg viewBox="0 0 24 24"><path d="M12 3.5 5 6.2v5.4c0 4.4 2.9 7.3 7 8.9 4.1-1.6 7-4.5 7-8.9V6.2z"/><path d="m9.3 12 1.8 1.8 3.6-3.8"/></svg></div>
+        <h3>Seguro</h3>
+        <p>Seus dados protegidos em cada etapa.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA FINAL -->
+<section class="cta">
+  <div class="cta-mark" aria-hidden="true"><span>FLUX</span></div>
+  <div class="wrap cta-inner">
+    <h2 data-reveal="up">Pronto para fazer seu próximo movimento?</h2>
+    <p data-reveal="fade">Abra sua conta em minutos, sem tarifas escondidas.</p>
+    <a href="cadastro_1.html" class="btn btn-primary btn-lg" data-reveal="scale">Criar minha conta →</a>
+    <div class="cta-checks" data-reveal="fade">
+      <div class="cta-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Sem tarifa de manutenção</div>
+      <div class="cta-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>Aprovação em minutos</div>
+      <div class="cta-check"><svg viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>100% digital</div>
+    </div>
+  </div>
+</section>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="foot-brand">
+        <div class="logo"><span class="logo-mark"></span>FLUX</div>
+        <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      </div>
+      <div class="foot-col">
+        <h5>Flux</h5>
+        <a href="#why">Sobre nós</a>
+        <a href="#funcionalidades">Funcionalidades</a>
+        <a href="#seguranca">Segurança</a>
+        <a href="#">Ajuda</a>
+      </div>
+      <div class="foot-col">
+        <h5>Conta</h5>
+        <a href="login.html">Entrar</a>
+        <a href="cadastro_1.html">Criar conta</a>
+      </div>
+      <div class="foot-col">
+        <h5>Legal</h5>
+        <a href="termos.html?from=landing">Termos</a>
+        <a href="privacidade.html?from=landing">Privacidade</a>
+      </div>
+      <div class="foot-col foot-col-contact">
+        <h5>Contato</h5>
+        <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>
+      </div>
+    </div>
+    <div class="foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </div>
+</footer>
+
+<script src="assets/flux.js"></script>
+</body>
+</html>

@@ -1,0 +1,410 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum AccountStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum TransactionType {
+  PIX
+  TRANSFER
+  CARD_PAYMENT
+  LOAN
+  LOAN_PAYMENT
+  GOAL_DEPOSIT
+  GOAL_WITHDRAW
+}
+
+enum TransactionDirection {
+  IN
+  OUT
+}
+
+enum TransactionStatus {
+  COMPLETED
+  FAILED
+}
+
+enum CardType {
+  VIRTUAL
+}
+
+enum CardBrand {
+  FLUX
+}
+
+enum CardStatus {
+  ACTIVE
+  BLOCKED
+}
+
+enum InvoiceStatus {
+  OPEN
+  PAID
+}
+
+enum CardPurchaseStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+}
+
+enum NotificationType {
+  ALERT_SECURITY
+  ALERT_MOVEMENT
+  ALERT_ACCOUNT
+  PIX_IN
+  PIX_OUT
+  CARD_PURCHASE
+  CARD_BLOCKED
+  CARD_UNBLOCKED
+  INVOICE_PAID
+  AUTH_LOGIN
+  LOAN_APPROVED
+  LOAN_DISBURSED
+  LOAN_INSTALLMENT_PAID
+  LOAN_PAID_OFF
+}
+
+enum AlertKind {
+  NEW_DEVICE_LOGIN
+  SUSPICIOUS_LOGIN
+  PIX_ABOVE
+  BALANCE_BELOW
+  PIX_SENT
+  PIX_RECEIVED
+  LOAN_CONTRACTED
+  LOAN_INSTALLMENT_DUE
+}
+
+enum LoanStatus {
+  REQUESTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  CONTRACTED
+  PAID_OFF
+}
+
+enum LoanInstallmentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+enum SessionRevokedReason {
+  LOGOUT
+  PASSWORD_CHANGED
+  REVOKE_ALL
+  ADMIN
+}
+
+enum GoalStatus {
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+enum GoalContributionType {
+  DEPOSIT
+  WITHDRAW
+}
+
+model User {
+  id                       String    @id @default(uuid())
+  fullName                 String    @map("full_name")
+  email                    String    @unique
+  cpf                      String    @unique
+  passwordHash             String    @map("password_hash")
+  acceptedTerms            Boolean   @default(true) @map("accepted_terms")
+  emailVerified            Boolean   @default(false) @map("email_verified")
+  emailVerifiedAt          DateTime? @map("email_verified_at")
+  emailVerifyToken         String?   @unique @map("email_verify_token")
+  emailVerifyTokenExpiry   DateTime? @map("email_verify_token_expiry")
+  pendingEmail             String?   @map("pending_email")
+  pendingEmailToken        String?   @unique @map("pending_email_token")
+  pendingEmailTokenExpiry  DateTime? @map("pending_email_token_expiry")
+  passwordResetToken       String?   @unique @map("password_reset_token")
+  passwordResetTokenExpiry DateTime? @map("password_reset_token_expiry")
+  lastLoginAt              DateTime? @map("last_login_at")
+  createdAt                DateTime  @default(now()) @map("created_at")
+  updatedAt                DateTime  @updatedAt @map("updated_at")
+
+  account Account?
+
+  cards         Card[]
+  notifications Notification[]
+  loans         Loan[]
+  loginHistory  LoginHistory[]
+  sessions      AuthSession[]
+  goals         Goal[]
+  alertSettings AlertSetting[]
+
+  @@map("users")
+}
+
+model Account {
+  id        String        @id @default(uuid())
+  userId    String        @unique @map("user_id")
+  user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status    AccountStatus @default(ACTIVE) @map("status")
+  balance   Decimal       @default(1000.00) @db.Decimal(15, 2)
+  agency    String        @default("0001")
+  number    String        @unique
+  createdAt DateTime      @default(now()) @map("created_at")
+  updatedAt DateTime      @updatedAt @map("updated_at")
+
+  transactions Transaction[]
+
+  cards         Card[]
+  cardPurchases CardPurchase[]
+  loans         Loan[]
+
+  @@map("accounts")
+}
+
+model LoginHistory {
+  id          String   @id @default(uuid())
+  userId      String   @map("user_id")
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  ip          String?
+  userAgent   String?  @map("user_agent")
+  deviceLabel String?  @map("device_label")
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@map("login_history")
+}
+
+model AuthSession {
+  id            String                @id @default(uuid())
+  userId        String                @map("user_id")
+  user          User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt     DateTime              @default(now()) @map("created_at")
+  expiresAt     DateTime              @map("expires_at")
+  lastUsedAt    DateTime              @default(now()) @map("last_used_at")
+  ip            String?
+  userAgent     String?               @map("user_agent")
+  deviceLabel   String?               @map("device_label")
+  // Agrupamento V1: HMAC-SHA256 do deviceId do cliente (o valor cru nunca é persistido).
+  // Nullable: sessões criadas antes da feature (ou sem deviceId) ficam sem grupo.
+  deviceIdHash  String?               @map("device_id_hash")
+  revokedAt     DateTime?             @map("revoked_at")
+  revokedReason SessionRevokedReason? @map("revoked_reason")
+
+  @@index([userId, revokedAt, lastUsedAt])
+  @@index([userId, expiresAt])
+  @@index([userId, deviceIdHash])
+  @@map("auth_sessions")
+}
+
+model Transaction {
+  id                 String               @id @default(uuid())
+  accountId          String               @map("account_id")
+  account            Account              @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  type               TransactionType
+  direction          TransactionDirection
+  status             TransactionStatus    @default(COMPLETED)
+  amount             Decimal              @db.Decimal(15, 2)
+  description        String?
+  counterpartyName   String?              @map("counterparty_name")
+  counterpartyNumber String?              @map("counterparty_number")
+  createdAt          DateTime             @default(now()) @map("created_at")
+  updatedAt          DateTime             @updatedAt @map("updated_at")
+
+  @@index([accountId, createdAt])
+  @@map("transactions")
+}
+
+model Card {
+  id             String     @id @default(uuid())
+  accountId      String     @map("account_id")
+  account        Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  userId         String     @map("user_id")
+  user           User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type           CardType   @default(VIRTUAL)
+  brand          CardBrand  @default(FLUX)
+  last4          String
+  number         String     @unique @map("pan_number")
+  status         CardStatus @default(ACTIVE)
+  creditLimit    Decimal    @default(5000.00) @map("credit_limit") @db.Decimal(15, 2)
+  availableLimit Decimal    @default(5000.00) @map("available_limit") @db.Decimal(15, 2)
+  expiresAt      DateTime?  @map("expires_at")
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  purchases CardPurchase[]
+  invoices  Invoice[]
+
+  @@index([userId])
+  @@map("cards")
+}
+
+model Invoice {
+  id          String        @id @default(uuid())
+  cardId      String        @map("card_id")
+  card        Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  closingDate DateTime      @map("closing_date")
+  dueDate     DateTime      @map("due_date")
+  status      InvoiceStatus @default(OPEN)
+  totalAmount Decimal       @default(0.00) @map("total_amount") @db.Decimal(15, 2)
+  paidAmount  Decimal       @default(0.00) @map("paid_amount") @db.Decimal(15, 2)
+  paidAt      DateTime?     @map("paid_at")
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+
+  purchases CardPurchase[]
+
+  @@unique([cardId, closingDate])
+  @@index([cardId, status])
+  @@map("invoices")
+}
+
+model CardPurchase {
+  id          String             @id @default(uuid())
+  cardId      String             @map("card_id")
+  card        Card               @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  invoiceId   String             @map("invoice_id")
+  invoice     Invoice            @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  accountId   String             @map("account_id")
+  account     Account            @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  amount      Decimal            @db.Decimal(15, 2)
+  description String
+  status      CardPurchaseStatus @default(PENDING)
+  createdAt   DateTime           @default(now()) @map("created_at")
+  updatedAt   DateTime           @updatedAt @map("updated_at")
+
+  @@index([cardId, createdAt])
+  @@index([invoiceId])
+  @@map("card_purchases")
+}
+
+model Notification {
+  id         String           @id @default(uuid())
+  userId     String           @map("user_id")
+  user       User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type       NotificationType
+  title      String
+  message    String?
+  amount     Decimal?         @db.Decimal(15, 2)
+  entityType String?          @map("entity_type")
+  entityId   String?          @map("entity_id")
+  readAt     DateTime?        @map("read_at")
+  dedupKey   String?          @map("dedup_key")
+  createdAt  DateTime         @default(now()) @map("created_at")
+
+  @@index([userId, createdAt])
+  @@index([userId, readAt])
+  @@index([userId, dedupKey])
+  @@map("notifications")
+}
+
+model Loan {
+  id               String     @id @default(uuid())
+  userId           String     @map("user_id")
+  user             User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accountId        String     @map("account_id")
+  account          Account    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  status           LoanStatus @default(REQUESTED)
+  amount           Decimal    @db.Decimal(15, 2)
+  interestRate     Decimal    @map("interest_rate") @db.Decimal(8, 6)
+  installments     Int
+  installmentValue Decimal    @map("installment_value") @db.Decimal(15, 2)
+  totalAmount      Decimal    @map("total_amount") @db.Decimal(15, 2)
+  interestTotal    Decimal    @map("interest_total") @db.Decimal(15, 2)
+  requestedAt      DateTime   @default(now()) @map("requested_at")
+  approvedAt       DateTime?  @map("approved_at")
+  rejectedAt       DateTime?  @map("rejected_at")
+  contractedAt     DateTime?  @map("contracted_at")
+  createdAt        DateTime   @default(now()) @map("created_at")
+  updatedAt        DateTime   @updatedAt @map("updated_at")
+
+  loanInstallments LoanInstallment[]
+
+  @@index([userId, status])
+  @@index([accountId, status])
+  @@map("loans")
+}
+
+model LoanInstallment {
+  id         String                @id @default(uuid())
+  loanId     String                @map("loan_id")
+  loan       Loan                  @relation(fields: [loanId], references: [id], onDelete: Cascade)
+  number     Int
+  dueDate    DateTime              @map("due_date")
+  amount     Decimal               @db.Decimal(15, 2)
+  principal  Decimal               @db.Decimal(15, 2)
+  interest   Decimal               @db.Decimal(15, 2)
+  status     LoanInstallmentStatus @default(PENDING)
+  paidAt     DateTime?             @map("paid_at")
+  paidAmount Decimal?              @map("paid_amount") @db.Decimal(15, 2)
+  createdAt  DateTime              @default(now()) @map("created_at")
+  updatedAt  DateTime              @updatedAt @map("updated_at")
+
+  @@unique([loanId, number])
+  @@index([loanId, dueDate, status])
+  @@map("loan_installments")
+}
+
+// ============================================================
+// LOTE 1 · METAS FINANCEIRAS
+// A reserva da meta é uma movimentação real (transactions
+// GOAL_DEPOSIT/GOAL_WITHDRAW); current_amount é o espelho do
+// valor reservado. Exclusão só é permitida com current_amount=0.
+// ============================================================
+model Goal {
+  id            String     @id @default(uuid())
+  userId        String     @map("user_id")
+  user          User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name          String
+  description   String?
+  targetAmount  Decimal    @map("target_amount") @db.Decimal(15, 2)
+  currentAmount Decimal    @default(0.00) @map("current_amount") @db.Decimal(15, 2)
+  status        GoalStatus @default(ACTIVE)
+  deadline      DateTime?
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  contributions GoalContribution[]
+
+  @@index([userId, status])
+  @@map("goals")
+}
+
+model GoalContribution {
+  id        String               @id @default(uuid())
+  goalId    String               @map("goal_id")
+  goal      Goal                 @relation(fields: [goalId], references: [id], onDelete: Cascade)
+  type      GoalContributionType
+  amount    Decimal              @db.Decimal(15, 2)
+  createdAt DateTime             @default(now()) @map("created_at")
+
+  @@index([goalId, createdAt])
+  @@map("goal_contributions")
+}
+
+// ============================================================
+// LOTE 1 · ALERTAS CONFIGURÁVEIS
+// Uma linha por (usuário, tipo de alerta). Ausência da linha =
+// comportamento padrão (habilitado, threshold padrão do serviço).
+// ============================================================
+model AlertSetting {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      AlertKind
+  enabled   Boolean   @default(true)
+  threshold Decimal?  @db.Decimal(15, 2)
+  updatedAt DateTime  @updatedAt @map("updated_at")
+
+  @@unique([userId, kind])
+  @@index([userId])
+  @@map("alert_settings")
+}

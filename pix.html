@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enviar PIX — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/pix.css">
+</head>
+<body id="pixPage">
+<div class="bg-grid"></div>
+
+<div class="pix-shell">
+  <header class="pix-header">
+    <a href="dashboard_1.html" class="pix-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="pix-head-right">
+      <span class="pix-user" id="pixUser" hidden>
+        <span class="pix-user-avatar" id="pixUserAvatar">?</span>
+        <span class="pix-user-name" id="pixUserName"></span>
+      </span>
+      <nav class="pix-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="pix-head-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="pix-head-btn pix-head-logout">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="pix-main">
+    <div class="pix-wrap">
+      <section class="pix-hero" aria-labelledby="pixTitle">
+        <span class="pix-eyebrow">Transferência instantânea</span>
+        <h1 class="pix-title" id="pixTitle">Envie um PIX</h1>
+        <p class="pix-sub">Transfira seu dinheiro de forma rápida, simples e segura.</p>
+        <p class="pix-status" id="pixStatus">Conectando à sua conta...</p>
+      </section>
+
+      <section class="pix-balance" id="pixAccountSummary" hidden aria-label="Resumo da conta">
+        <div class="pix-balance-head">
+          <div>
+            <span class="pix-balance-label">Saldo disponível</span>
+            <div class="pix-balance-value" id="pixBalance">R$ 0,00</div>
+          </div>
+          <span class="pix-balance-tag">Conta digital</span>
+        </div>
+        <div class="pix-balance-meta">
+          <span>Agência <strong id="pixAgency">—</strong></span>
+          <span>Conta <strong id="pixNumber">—</strong></span>
+        </div>
+      </section>
+
+      <section class="pix-card">
+        <div class="pix-states">
+
+          <div class="pix-state show" id="pixFormState">
+            <div class="pix-card-head">
+              <span class="pix-card-ic">
+                <svg viewBox="0 0 24 24"><path d="M12 2 4.5 5.5v5.6c0 4.6 3.2 8.5 7.5 9.9 4.3-1.4 7.5-5.3 7.5-9.9V5.5L12 2z"/><path d="M12 8v4M12 15.5h.01"/></svg>
+              </span>
+              <div class="pix-card-title">
+                <h2>Dados da transferência</h2>
+                <p>Preencha os dados e revise antes de enviar.</p>
+              </div>
+            </div>
+
+            <form id="pixForm" novalidate>
+              <div class="field" id="fieldPixAccount">
+                <label for="pixAccount">Número da conta</label>
+                <div class="input-wrap">
+                  <input type="text" id="pixAccount" inputmode="numeric" maxlength="8" placeholder="00000000" autocomplete="off">
+                </div>
+                <div class="field-error"></div>
+              </div>
+
+              <div class="field" id="fieldPixAmount">
+                <label for="pixAmount">Valor</label>
+                <div class="input-wrap">
+                  <span class="pix-currency" aria-hidden="true">R$</span>
+                  <input type="text" id="pixAmount" inputmode="decimal" placeholder="0,00" autocomplete="off">
+                </div>
+                <div class="field-error"></div>
+              </div>
+
+              <div class="field" id="fieldPixDesc">
+                <label for="pixDescription">Descrição <span>(opcional)</span></label>
+                <div class="input-wrap">
+                  <input type="text" id="pixDescription" maxlength="140" placeholder="O que é esse PIX?" autocomplete="off">
+                </div>
+                <div class="field-error"></div>
+              </div>
+
+              <button type="submit" class="btn btn-primary btn-block btn-lg pix-submit" id="pixSubmit">Continuar</button>
+            </form>
+
+            <p class="pix-safe-note">
+              <svg viewBox="0 0 24 24"><path d="M12 2 4.5 5.5v5.6c0 4.6 3.2 8.5 7.5 9.9 4.3-1.4 7.5-5.3 7.5-9.9V5.5L12 2z"/><path d="M12 8v4M12 15.5h.01"/></svg>
+              Transferência protegida pela Flux
+            </p>
+          </div>
+
+          <div class="pix-state" id="pixReview" hidden>
+            <div class="pix-card-head">
+              <span class="pix-card-ic">
+                <svg viewBox="0 0 24 24"><path d="M9 12l2 2 4-4"/><circle cx="12" cy="12" r="9"/></svg>
+              </span>
+              <div class="pix-card-title">
+                <h2>Revise sua transferência</h2>
+                <p>Confira os dados antes de confirmar o envio.</p>
+              </div>
+            </div>
+
+            <div class="pix-error-card" id="pixReviewError" role="alert" aria-live="assertive">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+              <div class="pix-error-body">
+                <strong class="pix-error-title">Não foi possível enviar</strong>
+                <span class="pix-error-msg"></span>
+              </div>
+              <button type="button" class="pix-retry" id="pixRetry">Tentar novamente</button>
+            </div>
+
+            <div class="pix-review-list">
+              <div class="pix-review-row">
+                <span class="pix-review-label">Valor</span>
+                <strong class="pix-review-val is-amount" id="pixReviewAmount">—</strong>
+              </div>
+              <div class="pix-review-row">
+                <span class="pix-review-label">Conta destino</span>
+                <strong class="pix-review-val" id="pixReviewAccount">—</strong>
+              </div>
+              <div class="pix-review-row">
+                <span class="pix-review-label">Descrição</span>
+                <strong class="pix-review-val pix-review-desc" id="pixReviewDescription">—</strong>
+              </div>
+            </div>
+
+            <div class="pix-review-actions">
+              <button type="button" class="btn btn-ghost btn-lg" id="pixBackToForm">Editar dados</button>
+              <button type="button" class="btn btn-primary btn-lg pix-submit" id="pixConfirm">Confirmar PIX</button>
+            </div>
+          </div>
+
+          <div class="pix-state pix-success" id="pixDone" role="status" aria-live="polite" hidden>
+            <div class="pix-success-ic">
+              <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+            <h2 class="pix-success-title">PIX enviado com sucesso</h2>
+            <p class="pix-success-sub" id="pixDoneText">Transferência concluída com segurança.</p>
+
+            <div class="pix-success-card">
+              <div class="pix-success-row">
+                <span>Valor</span>
+                <strong id="pixDoneAmount">—</strong>
+              </div>
+              <div class="pix-success-row">
+                <span>Destinatário</span>
+                <strong id="pixDoneName">—</strong>
+              </div>
+              <div class="pix-success-row">
+                <span>Conta</span>
+                <strong id="pixDoneAccount">—</strong>
+              </div>
+            </div>
+
+            <div class="pix-success-balance">
+              <span>Saldo atualizado</span>
+              <strong id="pixDoneBalance">—</strong>
+            </div>
+
+            <div class="pix-review-actions">
+              <a href="dashboard_1.html" class="btn btn-primary btn-lg pix-submit">Voltar para o dashboard</a>
+            </div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/pix.js"></script>
+</body>
+</html>

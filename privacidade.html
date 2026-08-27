@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Política de Privacidade — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+</head>
+<body>
+<a class="skip-link" href="#main-content">Pular para o conteúdo</a>
+<div class="bg-grid"></div>
+
+<div class="legal-page">
+  <div class="auth-topbar">
+    <div class="logo"><span class="logo-mark"></span>FLUX</div>
+    <a href="cadastro_1.html" class="back-link">
+      <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+      Voltar para o cadastro
+    </a>
+  </div>
+
+  <main id="main-content" tabindex="-1" class="legal-main">
+    <div class="legal-card">
+      <div class="legal-demo" role="note">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <span><strong>Documento de demonstração.</strong> Esta política é fictícia e integra um projeto de portfólio. Não é um documento jurídico válido nem representa a política de privacidade de qualquer instituição financeira real. Não forneça dados pessoais verdadeiros no ambiente de demonstração.</span>
+      </div>
+
+      <h1>Política de Privacidade</h1>
+      <p class="legal-meta">Última atualização: agosto de 2026</p>
+
+      <h2>1. Sobre este documento</h2>
+      <p>Esta Política de Privacidade descreve, de forma ilustrativa, o tratamento de dados na aplicação <strong>Flux</strong>. Como o projeto é uma demonstração de portfólio, <strong>não</strong> há coleta, armazenamento ou processamento real de dados pessoais por uma organização. O documento reflete boas práticas de transparência para ilustrar como um produto real estruturaria seus avisos.</p>
+
+      <h2>2. Dados tratados no ambiente de demonstração</h2>
+      <p>Para permitir a navegação pelo fluxo fictício de abertura de conta, a demonstração pode solicitar, exclusivamente em tela:</p>
+      <ul>
+        <li>nome, e-mail e CPF preenchidos pelo visitante;</li>
+        <li>senha escolhida para uso apenas na sessão de demonstração;</li>
+        <li>preferências de interface, como o modo de exibição de senha.</li>
+      </ul>
+      <p>Tais valores são tratados como dados de teste e devem ser <strong>fictícios</strong>. Eles não são persistidos por um serviço real de dados pessoais.</p>
+
+      <h2>3. Finalidades</h2>
+      <ul>
+        <li>Demonstrar o fluxo de cadastro e validação de formulário.</li>
+        <li>Ilustrar mecanismos de segurança e acessibilidade da interface.</li>
+        <li>Possibilitar o teste de interações do produto por quem avalia o portfólio.</li>
+      </ul>
+
+      <h2>4. Compartilhamento de dados</h2>
+      <p>Em um produto real, os dados poderiam ser compartilhados com prestadores de infraestrutura, prevenção a fraude e órgãos reguladores, no estrito cumprimento da lei. Nesta demonstração, <strong>nenhum dado é compartilhado com terceiros</strong>.</p>
+
+      <h2>5. Cookies e armazenamento local</h2>
+      <p>A demonstração utiliza armazenamento local do navegador para simular a sessão do usuário durante o teste. Nenhum cookie de rastreamento ou de publicidade é empregado.</p>
+
+      <h2>6. LGPD e direitos do titular</h2>
+      <p>Embora o projeto seja fictício, os fluxos foram pensados alinhados à <strong>Lei Geral de Proteção de Dados (Lei nº 13.709/2018)</strong>. Em um cenário real, o titular poderia solicitar, a qualquer momento:</p>
+      <ul>
+        <li>confirmação da existência de tratamento;</li>
+        <li>acesso, correção e anonimização dos dados;</li>
+        <li>portabilidade e revogação do consentimento;</li>
+        <li>eliminação dos dados tratados com consentimento.</li>
+      </ul>
+
+      <h2>7. Retenção e segurança</h2>
+      <p>Os dados desta demonstração ficam restritos ao navegador do visitante e podem ser apagados com a limpeza dos dados de navegação. Como boa prática retratada no produto, a comunicação com serviços de autenticação seria realizada exclusivamente por HTTPS, com senhas armazenadas de forma segura.</p>
+
+      <h2>8. Contato</h2>
+      <p>Dúvidas sobre esta demonstração podem ser enviadas para o contato fictício <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>, respondidas apenas no contexto do projeto de portfólio.</p>
+
+      <div class="legal-foot">
+        <span>© <span id="year"></span> Flux — projeto de demonstração</span>
+        <a class="legal-back" href="cadastro_1.html">
+          <svg viewBox="0 0 24 24"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          Voltar para o cadastro
+        </a>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+(function () {
+  var dest = {
+    landing: ['flux_7.html', 'Voltar para o site'],
+    cadastro: ['cadastro_1.html', 'Voltar para o cadastro']
+  };
+  var from = new URLSearchParams(location.search).get('from');
+  var ref = dest[from] || dest.cadastro;
+  document.querySelectorAll('.back-link, .legal-back').forEach(function (a) {
+    a.href = ref[0];
+    var t = Array.prototype.find.call(a.childNodes, function (n) { return n.nodeType === 3 && n.textContent.trim().length > 0; });
+    if (t) t.textContent = ' ' + ref[1];
+  });
+})();
+document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>

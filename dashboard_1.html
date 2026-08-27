@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/auth_1.css">
+<link rel="stylesheet" href="assets/dashboard.css">
+</head>
+<body id="dashV2">
+<div class="bg-grid"></div>
+<div class="dbv-neural" id="dbvNeural" aria-hidden="true">
+  <div class="dbv-n-grid" aria-hidden="true"></div>
+  <div class="dbv-n-flow" id="dbvNFlow" aria-hidden="true"></div>
+  <div class="dbv-n-glow" aria-hidden="true"></div>
+</div>
+
+<div class="dash-shell">
+  <header class="dash-header dbv-header">
+    <div class="logo"><span class="logo-mark"></span>FLUX</div>
+
+    <nav class="dbv-nav" id="dbvNav" aria-label="Navegação da conta">
+      <a href="#saldo">Saldo</a>
+      <a href="#visao">Visão</a>
+      <a href="#emprestimo">Empréstimo</a>
+      <a href="#movimentacoes">Movimentações</a>
+      <a href="extrato.html">Extrato</a>
+      <a href="cartao.html" class="dbv-nav-mob">Cartão</a>
+      <a href="flux_7.html" class="dbv-nav-mob">Sair</a>
+    </nav>
+
+    <div class="dbv-header-right">
+      <button type="button" class="dbv-burger" id="dbvBurger"
+              aria-haspopup="true" aria-expanded="false" aria-controls="dbvNav"
+              aria-label="Abrir menu" title="Menu">
+        <span></span><span></span><span></span>
+      </button>
+
+      <div class="dbv-bell-wrap" id="dbvNotificationsRoot">
+        <button type="button" class="dbv-bell" id="dbvBellBtn"
+                aria-haspopup="true" aria-expanded="false" aria-controls="dbvBellPanel"
+                aria-label="Notificações" title="Notificações">
+          <svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 20.5a2 2 0 0 1-3.4 0"/></svg>
+          <span class="dbv-bell-badge" id="dbvBellBadge" hidden>0</span>
+        </button>
+        <div class="dbv-bell-backdrop" id="dbvBellBackdrop" hidden aria-hidden="true"></div>
+        <div class="dbv-bell-panel" id="dbvBellPanel" hidden role="menu" aria-labelledby="dbvBellBtn">
+          <div class="dbv-bell-head">
+            <strong>Notificações</strong>
+            <span class="dbv-bell-head-count" id="dbvBellHeadCount" hidden></span>
+          </div>
+          <div class="dbv-bell-state show" id="dbvBellLoading" role="status" aria-live="polite" tabindex="-1">
+            <div class="verify-spinner"></div>
+            <p>Carregando notificações...</p>
+          </div>
+          <div class="dbv-bell-state" id="dbvBellEmpty" role="status" aria-live="polite" tabindex="-1">
+            <div class="dbv-bell-empty-ic"><svg viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 20.5a2 2 0 0 1-3.4 0"/></svg></div>
+            <p>Você não tem notificações.<br>Novidades aparecerão aqui.</p>
+          </div>
+          <div class="dbv-bell-state" id="dbvBellError" role="alert" aria-live="assertive" tabindex="-1">
+            <p id="dbvBellErrorText">Não foi possível carregar as notificações.</p>
+            <button type="button" class="dbv-bell-retry" id="dbvBellRetry">Tentar novamente</button>
+          </div>
+          <ul class="dbv-bell-list" id="dbvBellList"></ul>
+          <div class="dbv-bell-foot" id="dbvBellFoot">
+            <a href="notificacoes.html" class="dbv-bell-seeall" id="dbvBellSeeAll">
+              Ver todas
+              <svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg>
+            </a>
+          </div>
+        </div>
+      </div>
+
+      <div class="dbv-user-menu" id="dbvUserMenu">
+        <button type="button" class="dbv-user-menu-btn" id="dbvUserMenuBtn"
+                aria-haspopup="true" aria-expanded="false" aria-controls="dbvUserMenuPanel"
+                aria-label="Abrir menu do usuário" title="Conta">
+          <span class="dbv-user-avatar" id="dbvUserInitial">?</span>
+          <span class="dbv-user-name" id="dbvUserName">carregando...</span>
+          <svg class="dbv-user-caret" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="dbv-user-menu-backdrop" id="dbvUserMenuBackdrop" hidden aria-hidden="true"></div>
+        <div class="dbv-user-menu-panel" id="dbvUserMenuPanel" hidden role="menu" aria-labelledby="dbvUserMenuBtn">
+          <div class="dbv-user-menu-head">
+            <span class="dbv-user-menu-avatar" id="dbvUserMenuInitial" aria-hidden="true">?</span>
+            <span class="dbv-user-menu-id">
+              <strong id="dbvUserMenuName">carregando...</strong>
+              <span id="dbvUserMenuEmail">—</span>
+            </span>
+          </div>
+          <div class="dbv-user-menu-items">
+            <a href="configuracoes.html" class="dbv-user-menu-item" id="dbvConfigBtn" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.88 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.88.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg>
+              Configurações
+            </a>
+            <a href="flux_7.html" class="dbv-user-menu-item" id="logoutLink" role="menuitem">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+              Sair
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="dash-main db-main dbv-main">
+    <div class="dbv-wrap">
+
+      <!-- SAUDAÇÃO -->
+      <section class="dbv-greeting" id="saldo">
+        <div class="eyebrow">Área logada</div>
+        <h1 class="dbv-title">
+          <span id="dashGreeting">Boa tarde</span>, <span id="dashName">carregando...</span>
+        </h1>
+        <p id="dashStatus">Um resumo da sua vida financeira.</p>
+      </section>
+
+      <!-- SALDO -->
+      <section class="dbv-balance" id="dbvBalance">
+        <div class="dbv-balance-glow" aria-hidden="true"></div>
+        <div class="dbv-balance-top">
+          <div class="dbv-balance-titles">
+            <span class="dbv-balance-label">Saldo disponível</span>
+            <span class="dbv-balance-tag">Conta digital</span>
+          </div>
+          <button type="button" class="dbv-eye" id="dbvToggleBalance" aria-pressed="false" aria-label="Ocultar saldo" title="Ocultar saldo">
+            <svg class="dbv-eye-open" viewBox="0 0 24 24"><path d="M2 12s3.5-6.5 10-6.5S22 12 22 12s-3.5 6.5-10 6.5S2 12 2 12Z"/><circle cx="12" cy="12" r="2.6"/></svg>
+            <svg class="dbv-eye-closed" viewBox="0 0 24 24"><path d="M3 3l18 18M10.6 5.1A11 11 0 0 1 12 5c6.5 0 10 7 10 7a17 17 0 0 1-2.8 3.9M6.7 6.6A16.6 16.6 0 0 0 2 12s3.5 7 10 7c1.2 0 2.3-.2 3.3-.6M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          </button>
+        </div>
+        <div class="dbv-balance-value" id="dashBalance">—</div>
+        <div class="dbv-balance-meta">
+          <span>Agência <strong id="dashAgency">—</strong></span>
+          <span>Conta <strong id="dashNumber">—</strong></span>
+        </div>
+      </section>
+
+      <!-- AÇÕES RÁPIDAS -->
+      <section class="dbv-section" aria-label="Atalhos">
+        <div class="dbv-section-head">
+          <h2>Atalhos</h2>
+        </div>
+        <div class="dbv-shortcuts">
+          <a href="pix.html" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><path d="M8 4 4 8l4 4M16 20l4-4-4-4"/><path d="M4 8h5.5a3.5 3.5 0 0 1 2.47 1.02l1.06 1.06M20 16h-5.5a3.5 3.5 0 0 1-2.47-1.02l-1.06-1.06"/></svg></span>
+            <span class="dbv-short-name">PIX</span>
+          </a>
+          <a href="extrato.html" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/></svg></span>
+            <span class="dbv-short-name">Extrato</span>
+          </a>
+          <a href="cartao.html" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/><path d="M3 10h18"/><path d="M7 14.2h4"/></svg></span>
+            <span class="dbv-short-name">Cartão</span>
+          </a>
+          <a href="#emprestimo" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5v9M9.3 15c0 1.1 1.1 1.7 2.7 1.7 1.8 0 2.8-.7 2.8-1.9 0-1.3-1.1-1.6-2.8-2-1.6-.4-2.6-.8-2.6-2 0-1.1 1-1.8 2.6-1.8 1.5 0 2.5.6 2.6 1.6"/></svg></span>
+            <span class="dbv-short-name">Empréstimo</span>
+          </a>
+          <a href="metas.html" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></span>
+            <span class="dbv-short-name">Metas</span>
+          </a>
+          <a href="configuracoes.html" class="dbv-shortcut">
+            <span class="dbv-short-ic"><svg viewBox="0 0 24 24"><path d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Z"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.7 1.7 0 0 0-1.88-.34 1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-1.55 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.7 1.7 0 0 0 .34-1.88 1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 1.55-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.7 1.7 0 0 0 1.88.34h.09a1.7 1.7 0 0 0 1-1.55V3a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 1.55 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.7 1.7 0 0 0-.34 1.88v.09a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-1.55 1Z"/></svg></span>
+            <span class="dbv-short-name">Configurações</span>
+          </a>
+        </div>
+      </section>
+
+      <!-- VISÃO FINANCEIRA + RESUMO -->
+      <section class="dbv-section" id="visao">
+        <div class="dbv-section-head dbv-section-head-row">
+          <div>
+            <div class="eyebrow">Controle</div>
+            <h2>Visão financeira</h2>
+            <p class="dbv-section-sub">Entradas e saídas dos últimos dias, com o saldo derivado das suas movimentações reais.</p>
+          </div>
+          <div class="dbv-chart-tabs" id="dbvChartTabs" role="tablist" aria-label="Período do gráfico">
+            <button type="button" class="dbv-tab is-active" id="dbvTab7" data-days="7" role="tab" aria-selected="true" aria-controls="dbvChartWrap" tabindex="0">7 dias</button>
+            <button type="button" class="dbv-tab" id="dbvTab30" data-days="30" role="tab" aria-selected="false" aria-controls="dbvChartWrap" tabindex="-1">30 dias</button>
+          </div>
+        </div>
+
+        <div class="dbv-card dbv-chart-card">
+          <div class="dbv-chart-kpis">
+            <div class="dbv-kpi">
+              <span class="dbv-kpi-dot is-in"></span>
+              <div class="dbv-kpi-body">
+                <span class="dbv-kpi-label">Entradas</span>
+                <strong class="dbv-kpi-val is-in" id="dbvSumIn">—</strong>
+              </div>
+            </div>
+            <div class="dbv-kpi">
+              <span class="dbv-kpi-dot is-out"></span>
+              <div class="dbv-kpi-body">
+                <span class="dbv-kpi-label">Saídas</span>
+                <strong class="dbv-kpi-val is-out" id="dbvSumOut">—</strong>
+              </div>
+            </div>
+            <div class="dbv-kpi dbv-kpi-bal">
+              <span class="dbv-kpi-dot is-bal"></span>
+              <div class="dbv-kpi-body">
+                <span class="dbv-kpi-label">Saldo atual</span>
+                <strong class="dbv-kpi-val" id="dbvSumBal">—</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="dbv-chart-area">
+            <div class="dbv-chart-wrap" id="dbvChartWrap" role="tabpanel" aria-labelledby="dbvTab7" tabindex="0">
+            <div class="dbv-chart-state show" id="dbvChartLoading" role="status" aria-live="polite">
+              <div class="verify-spinner"></div>
+              <p>Montando seu gráfico...</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvChartEmpty" role="status" aria-live="polite">
+              <div class="dbv-empty-ic"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg></div>
+              <p>Sem movimentações nesse período.</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvChartError" role="alert" aria-live="assertive">
+              <p id="dbvChartErrorText">Não foi possível carregar o gráfico.</p>
+              <button type="button" class="btn btn-ghost" id="dbvChartRetry">Tentar novamente</button>
+            </div>
+            <svg class="dbv-chart" id="dbvChart" viewBox="0 0 640 250" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Gráfico de entradas e saídas nos últimos 7 dias" aria-describedby="dbvChartNote" hidden></svg>
+            <div class="dbv-chart-tip" id="dbvTooltip" role="tooltip" hidden></div>
+            </div>
+
+            <div class="dbv-chart-legend">
+              <span class="dbv-leg"><i class="dbv-sw is-in"></i>Entradas</span>
+              <span class="dbv-leg"><i class="dbv-sw is-out"></i>Saídas</span>
+              <span class="dbv-leg"><i class="dbv-sw is-bal"></i>Saldo</span>
+            </div>
+          </div>
+
+          <p class="dbv-chart-note" id="dbvChartNote">
+            Baseado nas suas movimentações reais do período. O saldo de cada dia é derivado do saldo atual e das transações do intervalo.
+          </p>
+        </div>
+      </section>
+
+      <!-- SIMULADOR DE EMPRÉSTIMO -->
+      <section class="dbv-section" id="emprestimo">
+        <div class="dbv-section-head">
+          <div class="eyebrow">Crédito</div>
+          <h2>Empréstimo pessoal</h2>
+          <p class="dbv-section-sub">Simule quanto você pagaria por mês. Sem compromisso e sem consulta ao seu score.</p>
+        </div>
+
+        <div class="dbv-card dbv-loan">
+          <div class="dbv-loan-head">
+            <span class="dbv-loan-live"><i class="dbv-loan-dot"></i>Cálculo em tempo real</span>
+          </div>
+
+          <div class="dbv-loan-field">
+            <div class="dbv-loan-field-top">
+              <label class="dbv-loan-label" for="dbvLoanSlider">Quanto você precisa?</label>
+              <span class="dbv-loan-value" id="dbvLoanAmount">R$ 5.000</span>
+            </div>
+            <input type="range" min="500" max="20000" step="100" value="5000" id="dbvLoanSlider" class="dbv-loan-range" aria-label="Valor desejado">
+            <div class="dbv-loan-range-labels"><span>R$ 500</span><span>R$ 20.000</span></div>
+            <div class="dbv-loan-presets" id="dbvLoanPresets">
+              <button type="button" class="dbv-loan-preset" data-amount="1000">R$ 1.000</button>
+              <button type="button" class="dbv-loan-preset" data-amount="2500">R$ 2.500</button>
+              <button type="button" class="dbv-loan-preset is-active" data-amount="5000">R$ 5.000</button>
+              <button type="button" class="dbv-loan-preset" data-amount="10000">R$ 10.000</button>
+            </div>
+          </div>
+
+          <div class="dbv-loan-field">
+            <div class="dbv-loan-field-top">
+              <label class="dbv-loan-label">Em quantas vezes?</label>
+            </div>
+            <div class="dbv-inst-grid" id="dbvLoanInst" role="group" aria-label="Número de parcelas">
+              <button type="button" class="inst-opt" data-n="6">6x</button>
+              <button type="button" class="inst-opt active" data-n="12">12x</button>
+              <button type="button" class="inst-opt" data-n="18">18x</button>
+              <button type="button" class="inst-opt" data-n="24">24x</button>
+              <button type="button" class="inst-opt" data-n="36">36x</button>
+            </div>
+          </div>
+
+          <div class="dbv-loan-hero">
+            <span class="dbv-loan-hero-label">Parcela estimada</span>
+            <div class="dbv-loan-hero-val" id="dbvLoanResult">12x de <span class="small">R$ 0,00</span></div>
+          </div>
+
+          <div class="dbv-loan-breakdown">
+            <div class="dbv-loan-bar">
+              <div class="dbv-seg-principal" id="dbvLoanBar" style="width:55%;"></div>
+              <div class="dbv-seg-juros"></div>
+            </div>
+            <div class="dbv-loan-legend">
+              <span class="dbv-loan-leg-item is-principal">Principal <b id="dbvLoanPrincipal">—</b></span>
+              <span class="dbv-loan-leg-item is-juros">Juros <b id="dbvLoanJuros">—</b></span>
+            </div>
+          </div>
+
+          <div class="dbv-loan-stats">
+            <div class="dbv-loan-stat">
+              <span class="dbv-loan-stat-label">Total a pagar</span>
+              <strong class="dbv-loan-stat-val" id="dbvLoanTotal">—</strong>
+            </div>
+            <div class="dbv-loan-stat">
+              <span class="dbv-loan-stat-label">Taxa mensal</span>
+              <strong class="dbv-loan-stat-val" id="dbvLoanRate">—</strong>
+            </div>
+            <div class="dbv-loan-stat">
+              <span class="dbv-loan-stat-label">Parcelas</span>
+              <strong class="dbv-loan-stat-val" id="dbvLoanParcelas">—</strong>
+            </div>
+          </div>
+
+          <button type="button" class="btn dbv-loan-cta" id="dbvLoanCta" title="Solicitar empréstimo">
+            <span id="dbvLoanCtaText">Solicitar empréstimo</span>
+          </button>
+
+          <div class="dbv-loan-status" id="dbvLoanStatus" role="status" aria-live="polite" hidden>
+            <span class="dbv-loan-status-dot" aria-hidden="true"></span>
+            <div class="dbv-loan-status-body">
+              <strong id="dbvLoanStatusTitle"></strong>
+              <span id="dbvLoanStatusText"></span>
+            </div>
+            <button type="button" class="btn dbv-loan-contract" id="dbvLoanContract" disabled>
+              Contratar empréstimo
+            </button>
+          </div>
+
+          <div class="dbv-loan-inst" id="dbvLoanInstBox" hidden>
+            <div class="dbv-loan-inst-top">
+              <span class="dbv-loan-inst-title">Parcelas do empréstimo</span>
+              <span class="dbv-inst-count" id="dbvInstCount">0 de 0 pagas</span>
+            </div>
+            <ul class="dbv-loan-inst-list" id="dbvLoanInstList" aria-live="polite"></ul>
+          </div>
+
+          <p class="dbv-loan-note">
+            Valores de simulação. A taxa de <b id="dbvLoanRateNote">1,99% a.m.</b> é uma referência interna de demonstração e não representa uma oferta real de crédito da Flux.
+          </p>
+        </div>
+      </section>
+
+      <!-- ÚLTIMAS MOVIMENTAÇÕES -->
+      <section class="dbv-section" id="movimentacoes">
+        <div class="dbv-section-head dbv-section-head-row">
+          <div>
+            <div class="eyebrow">Extrato</div>
+            <h2>Últimas movimentações</h2>
+            <p class="dbv-section-sub">Tudo que entrou e saiu da sua conta Flux.</p>
+          </div>
+          <button type="button" class="dbv-see-all" id="dbvSeeAll" aria-expanded="false" aria-controls="dbvAllPanel">
+            <span id="dbvSeeAllLabel">Ver todas</span>
+            <span class="dbv-see-all-count" id="dbvSeeAllCount"></span>
+          </button>
+        </div>
+
+        <div class="dbv-card dbv-movements">
+          <div id="dbvRecentView">
+            <div class="dbv-chart-state show" id="dbvRecentLoading" role="status" aria-live="polite">
+              <div class="verify-spinner"></div>
+              <p>Carregando movimentações...</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvRecentEmpty" role="status" aria-live="polite">
+              <div class="dbv-empty-ic"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg></div>
+              <p>Nenhuma movimentação ainda.<br>Quando você enviar ou receber um PIX, ele aparecerá aqui.</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvRecentError" role="alert" aria-live="assertive">
+              <p id="dbvRecentErrorText">Não foi possível carregar as movimentações.</p>
+              <button type="button" class="btn btn-ghost" id="dbvRecentRetry">Tentar novamente</button>
+            </div>
+            <ul class="stmt-list" id="dbvRecentList"></ul>
+          </div>
+
+          <!-- lista completa, expandida dentro do mesmo card (paginada) -->
+          <div class="dbv-allview" id="dbvAllPanel" tabindex="-1" hidden>
+            <div class="dbv-chart-state show" id="dbvAllLoading" role="status" aria-live="polite">
+              <div class="verify-spinner"></div>
+              <p>Carregando...</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvAllEmpty" role="status" aria-live="polite">
+              <div class="dbv-empty-ic"><svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg></div>
+              <p>Nenhuma movimentação ainda.</p>
+            </div>
+            <div class="dbv-chart-state" id="dbvAllError" role="alert" aria-live="assertive">
+              <p id="dbvAllErrorText">Não foi possível carregar o extrato.</p>
+              <button type="button" class="btn btn-ghost" id="dbvAllRetry">Tentar novamente</button>
+            </div>
+            <ul class="stmt-list" id="dbvAllList"></ul>
+            <div class="stmt-pager" id="dbvAllPager">
+              <button type="button" class="pager-btn" id="dbvAllPrev">← Anterior</button>
+              <span class="stmt-pageinfo" id="dbvAllPageInfo" role="status" aria-live="polite">Página 1 de 1</span>
+              <button type="button" class="pager-btn" id="dbvAllNext">Próxima →</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+
+    </div>
+  </main>
+
+  <!-- RODAPÉ -->
+  <footer class="dbv-footer" aria-label="Rodapé da conta">
+    <div class="dbv-foot-grid">
+      <div class="dbv-foot-brand">
+        <div class="logo"><span class="logo-mark"></span>FLUX</div>
+        <p>Uma nova experiência financeira, criada para colocar você no controle.</p>
+      </div>
+      <div class="dbv-foot-col">
+        <h5>Navegação</h5>
+        <a href="#saldo">Saldo</a>
+        <a href="#visao">Visão financeira</a>
+        <a href="#movimentacoes">Movimentações</a>
+        <a href="extrato.html">Extrato</a>
+        <a href="metas.html">Metas</a>
+<a href="configuracoes.html">Configurações</a>
+      </div>
+      <div class="dbv-foot-col">
+        <h5>Produtos</h5>
+        <a href="pix.html">PIX</a>
+        <a href="cartao.html">Cartão</a>
+        <a href="#emprestimo">Empréstimo</a>
+      </div>
+      <div class="dbv-foot-col">
+        <h5>Legal</h5>
+        <a href="termos.html">Termos de uso</a>
+        <a href="privacidade.html">Privacidade</a>
+      </div>
+      <div class="dbv-foot-col dbv-foot-contact">
+        <h5>Contato</h5>
+        <a href="mailto:alandevfront@gmail.com">alandevfront@gmail.com</a>
+      </div>
+    </div>
+    <div class="dbv-foot-bottom">
+      <span>© 2026 Flux. Todos os direitos reservados.</span>
+      <span>Feito com foco em clareza e controle.</span>
+    </div>
+  </footer>
+</div>
+
+<!-- Revisão de contratação — modal acessível -->
+<div class="dbv-modal" id="dbvLoanModal" role="dialog" aria-modal="true"
+     aria-labelledby="dbvLoanModalTitle" aria-describedby="dbvLoanModalDesc" aria-hidden="true" hidden>
+  <div class="dbv-modal-backdrop" data-dbvm-close></div>
+  <div class="dbv-modal-panel" id="dbvLoanModalPanel" role="document">
+    <button type="button" class="dbv-modal-x" id="dbvLoanModalClose" aria-label="Fechar revisão">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="dbv-modal-eyebrow">Revisão da contratação</div>
+    <h2 class="dbv-modal-title" id="dbvLoanModalTitle">Confirmar contratação</h2>
+    <p class="dbv-modal-desc" id="dbvLoanModalDesc">
+      Confira os valores oficiais antes de contratar. Ao confirmar, o valor de
+      <b id="dbvLmDescAmount">—</b> será liberado na sua conta Flux.
+    </p>
+    <dl class="dbv-modal-summary">
+      <div class="dbv-ms-row">
+        <dt>Valor contratado</dt>
+        <dd id="dbvLmAmount">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Número de parcelas</dt>
+        <dd id="dbvLmInst">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Valor da parcela</dt>
+        <dd id="dbvLmParcel">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Taxa mensal</dt>
+        <dd id="dbvLmRate">—</dd>
+      </div>
+      <div class="dbv-ms-row dbv-ms-total">
+        <dt>Total a pagar</dt>
+        <dd id="dbvLmTotal">—</dd>
+      </div>
+    </dl>
+    <p class="dbv-modal-err" id="dbvLmError" role="alert" hidden></p>
+    <div class="dbv-modal-actions">
+      <button type="button" class="btn dbv-modal-cancel" id="dbvLmCancel">Cancelar</button>
+      <button type="button" class="btn dbv-modal-confirm" id="dbvLmConfirm">
+        <span id="dbvLmConfirmText">Confirmar contratação</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Pagamento de parcela — modal acessível no padrão da contratação -->
+<div class="dbv-modal" id="dbvPayModal" role="dialog" aria-modal="true"
+     aria-labelledby="dbvPayModalTitle" aria-describedby="dbvPayModalDesc" aria-hidden="true" hidden>
+  <div class="dbv-modal-backdrop" data-dbvm-close></div>
+  <div class="dbv-modal-panel" id="dbvPayModalPanel" role="document">
+    <button type="button" class="dbv-modal-x" id="dbvPayModalClose" aria-label="Fechar confirmação de pagamento">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+    <div class="dbv-modal-eyebrow">Pagamento de parcela</div>
+    <h2 class="dbv-modal-title" id="dbvPayModalTitle">Confirmar pagamento</h2>
+    <p class="dbv-modal-desc" id="dbvPayModalDesc">
+      O valor da parcela será debitado do saldo da sua conta Flux. Confira os dados antes de confirmar.
+    </p>
+    <dl class="dbv-modal-summary">
+      <div class="dbv-ms-row">
+        <dt>Parcela</dt>
+        <dd id="dbvPayInst">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Vencimento</dt>
+        <dd id="dbvPayDue">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Valor a pagar</dt>
+        <dd id="dbvPayAmount">—</dd>
+      </div>
+      <div class="dbv-ms-row">
+        <dt>Saldo atual</dt>
+        <dd id="dbvPayBalance">—</dd>
+      </div>
+    </dl>
+    <p class="dbv-modal-err" id="dbvPayError" role="alert" hidden></p>
+    <div class="dbv-modal-actions">
+      <button type="button" class="btn dbv-modal-cancel" id="dbvPayCancel">Cancelar</button>
+      <button type="button" class="btn dbv-modal-confirm" id="dbvPayConfirm">
+        <span id="dbvPayConfirmText">Confirmar pagamento</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/notifications.js"></script>
+<script src="assets/dashboard.js"></script>
+</body>
+</html>

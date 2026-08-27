@@ -1,0 +1,24 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flux-postgres
+    restart: unless-stopped
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: flux
+      POSTGRES_PASSWORD: flux123
+      POSTGRES_DB: flux
+    volumes:
+      - flux_pg_data:/data
+
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: flux-mailpit
+    restart: unless-stopped
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  flux_pg_data:

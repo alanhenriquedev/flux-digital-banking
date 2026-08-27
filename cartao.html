@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartão — Flux</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/flux.css">
+<link rel="stylesheet" href="assets/card.css">
+</head>
+<body id="cardPage">
+<div class="bg-grid"></div>
+
+<div class="crd-shell">
+  <header class="crd-header">
+    <a href="dashboard_1.html" class="crd-logo" aria-label="Flux — voltar para o dashboard">
+      <span class="logo-mark"></span>FLUX
+    </a>
+    <div class="crd-head-right">
+      <span class="crd-user" id="crdUser" hidden>
+        <span class="crd-user-avatar" id="crdUserAvatar">?</span>
+        <span class="crd-user-name" id="crdUserName"></span>
+      </span>
+      <nav class="crd-head-actions" aria-label="Navegação">
+        <a href="dashboard_1.html" class="crd-head-btn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+          <span>Voltar</span>
+        </a>
+        <a href="flux_7.html" id="logoutLink" class="crd-head-btn crd-head-logout">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+          <span>Sair</span>
+        </a>
+      </nav>
+    </div>
+  </header>
+
+  <main class="crd-main">
+    <div class="crd-wrap">
+      <section class="crd-hero" aria-labelledby="crdTitle">
+        <span class="crd-eyebrow">Cartão Flux</span>
+        <h1 class="crd-title" id="crdTitle">Seu cartão virtual</h1>
+        <p class="crd-sub">Controle de limite, fatura e compras — com a segurança da Flux.</p>
+        <p class="crd-status" id="crdStatus">Conectando à sua conta...</p>
+      </section>
+
+      <section class="crd-stage" id="crdStage" aria-live="polite">
+
+        <div class="crd-state show" id="crdLoading" role="status">
+          <div class="crd-spinner"></div>
+          <p>Buscando seu cartão...</p>
+        </div>
+
+        <div class="crd-state" id="crdError" role="alert" aria-live="assertive">
+          <div class="crd-error-ic">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+          </div>
+          <h2>Não foi possível carregar o cartão</h2>
+          <p id="crdErrorText">Tente novamente em instantes.</p>
+          <button type="button" class="btn btn-ghost btn-lg" id="crdRetry">Tentar novamente</button>
+        </div>
+
+        <div class="crd-content" id="crdContent" hidden>
+          <div class="crd-grid">
+
+            <!-- ============ CARTÃO HERO ============ -->
+            <section class="crd-hero-card crd-rise" aria-label="Cartão virtual Flux">
+              <div class="crd-card3d" id="crdCard3D">
+                <div class="crd-artcard" id="crdArtCard" tabindex="0"
+                     aria-label="Cartão virtual Flux. Use Ver verso para acessar a área protegida.">
+
+                  <!-- FRENTE -->
+                  <div class="crd-face crd-face-front">
+                    <span class="crd-art-orb" aria-hidden="true"></span>
+                    <span class="crd-art-orb crd-art-orb-2" aria-hidden="true"></span>
+                    <span class="crd-art-halo" aria-hidden="true"></span>
+                    <span class="crd-art-rb" aria-hidden="true"></span>
+                    <div class="crd-art-top">
+                      <span class="crd-art-chip" aria-hidden="true">
+                        <svg viewBox="0 0 24 16"><path d="M1.5 1.5h21v13h-21z"/><path d="M1.5 5.5h21M7 1.5v13M12 1.5v13M17 1.5v13"/></svg>
+                      </span>
+                      <svg class="crd-art-nfc" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M17.5 17.5a10 10 0 0 0 0-11"/><path d="M14.2 15.2a6 6 0 0 0 0-6.4"/><path d="M11 13a2 2 0 0 0 0-2"/><path d="M20 20a13 13 0 0 0 0-16"/>
+                      </svg>
+                      <span class="crd-art-brand"><span class="crd-art-brand-mark" aria-hidden="true"></span>FLUX</span>
+                    </div>
+
+                    <div class="crd-art-num">
+                      <span class="crd-mask" id="crdCardNum">•••• •••• •••• ••••</span>
+                    </div>
+
+                    <div class="crd-art-bottom">
+                      <div class="crd-art-holder">
+                        <span class="crd-art-label">Titular</span>
+                        <strong class="crd-art-name" id="crdCardHolder">—</strong>
+                      </div>
+                      <div class="crd-art-valid">
+                        <span class="crd-art-label">Validade</span>
+                        <strong class="crd-art-val" id="crdCardExpiry">—</strong>
+                      </div>
+                      <span class="crd-art-type" id="crdCardType">VIRTUAL</span>
+                    </div>
+                  </div>
+
+                  <!-- VERSO -->
+                  <div class="crd-face crd-face-back">
+                    <div class="crd-back-stripe" aria-hidden="true"></div>
+                    <div class="crd-back-body">
+                      <div class="crd-back-sign">
+                        <div class="crd-back-sign-main">
+                          <div class="crd-back-ink" aria-hidden="true">
+                            <svg viewBox="0 0 220 24"><path d="M4 16c26-9 44 2 66-7s48-2 66-6 32 3 56-2"/></svg>
+                          </div>
+                          <span class="crd-back-sign-label">Assinatura do titular</span>
+                        </div>
+                        <div class="crd-back-cvv">
+                          <span class="crd-back-label">CVV protegido</span>
+                          <div class="crd-back-cvv-box">
+                            <span class="crd-back-cvv-val" aria-hidden="true">•••</span>
+                            <svg class="crd-back-eye" viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class="crd-back-meta">
+                        <span class="crd-back-holo" aria-hidden="true">
+                          <span class="crd-back-holo-mark"></span>
+                          <span class="crd-back-holo-flux">FLUX</span>
+                        </span>
+                        <span class="crd-back-lock">
+                          <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                          <span>Dados protegidos</span>
+                        </span>
+                      </div>
+
+                      <p class="crd-back-note">Este é um cartão virtual de demonstração. Número e CVV permanecem protegidos e nunca são exibidos integralmente.</p>
+                    </div>
+                  </div>
+
+                  <!-- OVERLAY BLOQUEADO -->
+                  <div class="crd-art-block" id="crdBlockOverlay" hidden>
+                    <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/><path d="M12 15v2.5"/></svg>
+                    <strong>Cartão bloqueado</strong>
+                    <span>Nenhuma compra será aprovada</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="crd-card-ctrl">
+                <button type="button" class="crd-ctrl-btn crd-ctrl-btn-primary" id="crdNumBtn" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+                  <span id="crdNumLabel">Ver número do cartão</span>
+                </button>
+                <button type="button" class="crd-ctrl-btn" id="crdFlipBtn" aria-expanded="false">
+                  <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 10a8 8 0 0 1 14.2-3.6M20 14a8 8 0 0 1-14.2 3.6"/><path d="M18 3v3.5h-3.5M6 21v-3.5h3.5"/></svg>
+                  <span id="crdFlipLabel">Ver verso</span>
+                </button>
+                <span class="crd-badge-status is-active" id="crdCardStatus">Ativo</span>
+              </div>
+            </section>
+
+            <!-- ============ LIMITE ============ -->
+            <section class="crd-card crd-limit crd-rise" aria-labelledby="crdLimitTitle">
+              <div class="crd-card-head">
+                <div class="crd-card-title">
+                  <h2 id="crdLimitTitle">Limite do cartão</h2>
+                  <p>Quanto do seu limite já está em uso.</p>
+                </div>
+                <span class="crd-limit-avail-tag">Cartão virtual</span>
+              </div>
+
+              <div class="crd-limit-top">
+                <div class="crd-limit-avail-block">
+                  <span class="crd-limit-label">Limite disponível</span>
+                  <div class="crd-limit-big" id="crdLimitAvail">—</div>
+                </div>
+                <div class="crd-limit-pct is-up" id="crdLimitPct" aria-live="polite">0%</div>
+              </div>
+
+              <div class="crd-limit-bar" aria-hidden="true">
+                <div class="crd-limit-bar-fill" id="crdLimitBarFill" style="width:0%"></div>
+                <span class="crd-limit-bar-thumb" id="crdLimitThumb"></span>
+              </div>
+
+              <div class="crd-limit-grid">
+                <div class="crd-limit-item">
+                  <span class="crd-limit-label">Limite total</span>
+                  <strong class="crd-limit-val" id="crdLimitTotal">—</strong>
+                </div>
+                <div class="crd-limit-item">
+                  <span class="crd-limit-label">Utilizado</span>
+                  <strong class="crd-limit-val" id="crdLimitUsed">—</strong>
+                </div>
+                <div class="crd-limit-item">
+                  <span class="crd-limit-label">Status</span>
+                  <strong class="crd-limit-val" id="crdLimitStatus">—</strong>
+                </div>
+              </div>
+            </section>
+
+            <!-- ============ FATURA ============ -->
+            <section class="crd-card crd-invoice crd-rise" aria-labelledby="crdInvoiceTitle">
+              <div class="crd-card-head">
+                <div class="crd-card-title">
+                  <h2 id="crdInvoiceTitle">Fatura atual</h2>
+                  <p id="crdInvoiceSub">Acompanhe seu ciclo de faturamento.</p>
+                </div>
+                <span class="crd-inv-status is-open" id="crdInvStatus">—</span>
+              </div>
+
+              <div class="crd-inv-hero">
+                <div class="crd-inv-amount-block">
+                  <span class="crd-limit-label">Valor da fatura</span>
+                  <div class="crd-inv-amount" id="crdInvAmount">R$ 0,00</div>
+                  <div class="crd-inv-cycle" id="crdInvCycle"></div>
+                </div>
+                <div class="crd-inv-dates">
+                  <div class="crd-inv-date"><span>Fecha em</span><strong id="crdInvClosing">—</strong></div>
+                  <div class="crd-inv-date"><span>Vence em</span><strong id="crdInvDue">—</strong></div>
+                </div>
+              </div>
+
+              <div class="crd-inv-paid" id="crdInvPaid" role="status" hidden></div>
+
+              <button type="button" class="btn btn-primary btn-lg crd-inv-pay" id="crdPayBtn">Pagar fatura</button>
+            </section>
+
+            <!-- ============ AÇÕES ============ -->
+            <section class="crd-actions crd-rise" aria-label="Ações do cartão">
+              <button type="button" class="crd-action" id="crdSeePurchases">
+                <span class="crd-action-ic">
+                  <svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+                </span>
+                <span class="crd-action-txt">
+                  <strong>Ver compras</strong>
+                  <small>Confira os últimos lançamentos</small>
+                </span>
+                <svg class="crd-action-arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+
+              <button type="button" class="crd-action" id="crdViewInvoice">
+                <span class="crd-action-ic">
+                  <svg viewBox="0 0 24 24"><path d="M6 3h12v18l-3-2-3 2-3-2-3 2z"/><path d="M9 8h6M9 12h6"/></svg>
+                </span>
+                <span class="crd-action-txt">
+                  <strong>Ver fatura</strong>
+                  <small>Detalhes do ciclo atual</small>
+                </span>
+                <svg class="crd-action-arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+
+              <button type="button" class="crd-action" id="crdBlockAction">
+                <span class="crd-action-ic is-danger">
+                  <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+                </span>
+                <span class="crd-action-txt">
+                  <strong id="crdBlockActionLabel">Bloquear cartão</strong>
+                  <small id="crdBlockActionSub">Em caso de perda ou roubo</small>
+                </span>
+                <svg class="crd-action-arrow" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg>
+              </button>
+            </section>
+
+            <!-- ============ COMPRAS ============ -->
+            <section class="crd-card crd-purchases crd-rise" id="crdPurchasesSection" aria-labelledby="crdPurchasesTitle">
+              <div class="crd-card-head">
+                <div class="crd-card-title">
+                  <h2 id="crdPurchasesTitle">Compras recentes</h2>
+                  <p id="crdPurchasesSub">Últimos lançamentos do ciclo da fatura.</p>
+                </div>
+              </div>
+
+              <div class="crd-chart-state show" id="crdPurchLoading" role="status" aria-live="polite">
+                <div class="crd-spinner crd-spinner-sm"></div>
+                <p>Carregando compras...</p>
+              </div>
+              <div class="crd-chart-state" id="crdPurchEmpty" role="status" aria-live="polite">
+                <div class="crd-empty-ic">
+                  <svg viewBox="0 0 24 24"><circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path d="M2 3h3l2.6 12.2a1.6 1.6 0 0 0 1.6 1.3h8.3a1.6 1.6 0 0 0 1.6-1.2L21 8H6"/></svg>
+                </div>
+                <p>Nenhuma compra lançada neste ciclo ainda.</p>
+              </div>
+              <div class="crd-chart-state" id="crdPurchError" role="alert" aria-live="assertive">
+                <p id="crdPurchErrorText">Não foi possível carregar as compras.</p>
+                <button type="button" class="btn btn-ghost" id="crdPurchRetry">Tentar novamente</button>
+              </div>
+              <ul class="crd-purch-list" id="crdPurchList"></ul>
+            </section>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- ============ MODAL: PAGAR FATURA ============ -->
+<div class="crd-modal" id="crdModalPay" role="dialog" aria-modal="true" aria-labelledby="crdPayTitle">
+  <div class="crd-modal-backdrop" data-close="crdModalPay"></div>
+  <div class="crd-modal-card">
+    <button type="button" class="crd-modal-close" data-close="crdModalPay" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div class="crd-modal-step show" id="crdPayReviewStep">
+      <div class="crd-modal-head">
+        <span class="crd-modal-ic">
+          <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/><path d="M3 10h18"/><path d="M7 14.2h4"/></svg>
+        </span>
+        <div class="crd-modal-title">
+          <h2 id="crdPayTitle">Pagar fatura</h2>
+          <p>Confira o valor antes de confirmar o pagamento.</p>
+        </div>
+      </div>
+
+      <div class="crd-error-card" id="crdPayError" role="alert" aria-live="assertive">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg>
+        <div class="crd-error-body">
+          <strong class="crd-error-title">Não foi possível pagar</strong>
+          <span class="crd-error-msg"></span>
+        </div>
+        <button type="button" class="crd-retry" id="crdPayRetry">Tentar novamente</button>
+      </div>
+
+      <div class="crd-review-list">
+        <div class="crd-review-row">
+          <span class="crd-review-label">Valor da fatura</span>
+          <strong class="crd-review-val is-amount" id="crdPayAmount">—</strong>
+        </div>
+        <div class="crd-review-row">
+          <span class="crd-review-label">Vencimento</span>
+          <strong class="crd-review-val" id="crdPayDue">—</strong>
+        </div>
+        <div class="crd-review-row">
+          <span class="crd-review-label">Saldo disponível</span>
+          <strong class="crd-review-val" id="crdPayBalance">—</strong>
+        </div>
+        <div class="crd-review-row">
+          <span class="crd-review-label">Novo limite após</span>
+          <strong class="crd-review-val is-up" id="crdPayNewLimit">—</strong>
+        </div>
+      </div>
+
+      <div class="crd-modal-note">
+        <svg viewBox="0 0 24 24"><path d="M12 2 4.5 5.5v5.6c0 4.6 3.2 8.5 7.5 9.9 4.3-1.4 7.5-5.3 7.5-9.9V5.5L12 2z"/><path d="M12 8v4M12 15.5h.01"/></svg>
+        <span>O pagamento integral usa o <b>saldo da sua conta</b> e devolve o valor ao <b>limite do cartão</b>.</span>
+      </div>
+
+      <div class="crd-modal-actions">
+        <button type="button" class="btn btn-ghost btn-lg" data-close="crdModalPay">Cancelar</button>
+        <button type="button" class="btn btn-primary btn-lg" id="crdPayConfirm">Pagar fatura</button>
+      </div>
+    </div>
+
+    <div class="crd-modal-step crd-loading" id="crdPayLoadingStep">
+      <div class="crd-spinner"></div>
+      <p>Processando pagamento...</p>
+    </div>
+
+    <div class="crd-modal-step crd-success" id="crdPayDoneStep">
+      <div class="crd-success-ic">
+        <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+      </div>
+      <h2 class="crd-success-title">Fatura paga</h2>
+      <p class="crd-success-sub">O valor foi descontado e seu limite foi liberado.</p>
+
+      <div class="crd-success-card">
+        <div class="crd-success-row">
+          <span>Valor pago</span>
+          <strong id="crdPayDoneAmount">—</strong>
+        </div>
+        <div class="crd-success-row">
+          <span>Saldo da conta</span>
+          <strong id="crdPayDoneBalance">—</strong>
+        </div>
+        <div class="crd-success-row">
+          <span>Novo limite</span>
+          <strong id="crdPayDoneLimit">—</strong>
+        </div>
+      </div>
+
+      <div class="crd-modal-actions">
+        <button type="button" class="btn btn-primary btn-lg" id="crdPayDoneClose">Concluir</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: VER FATURA ============ -->
+<div class="crd-modal" id="crdModalInvoice" role="dialog" aria-modal="true" aria-labelledby="crdInvModalTitle">
+  <div class="crd-modal-backdrop" data-close="crdModalInvoice"></div>
+  <div class="crd-modal-card crd-modal-wide">
+    <button type="button" class="crd-modal-close" data-close="crdModalInvoice" aria-label="Fechar">
+      <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+
+    <div class="crd-modal-head">
+      <span class="crd-modal-ic">
+        <svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="2.2"/><path d="M3 10h18"/><path d="M7 14.2h4"/></svg>
+      </span>
+      <div class="crd-modal-title">
+        <h2 id="crdInvModalTitle">Sua fatura</h2>
+        <p>Todas as compras do período em um só lugar.</p>
+      </div>
+    </div>
+
+    <div class="crd-inv-banner" id="crdInvModalBanner">
+      <div class="crd-inv-banner-block">
+        <span class="crd-limit-label">Valor da fatura</span>
+        <div class="crd-inv-banner-amount" id="crdInvModalAmount">R$ 0,00</div>
+      </div>
+      <div class="crd-inv-banner-meta">
+        <span class="crd-inv-status is-open" id="crdInvModalStatus">—</span>
+        <span class="crd-inv-meta-item">Fecha em <strong id="crdInvModalClosing">—</strong></span>
+        <span class="crd-inv-meta-item">Vence em <strong id="crdInvModalDue">—</strong></span>
+      </div>
+    </div>
+
+    <div class="crd-chart-state show" id="crdInvModalLoading" role="status" aria-live="polite">
+      <div class="crd-spinner crd-spinner-sm"></div>
+      <p>Carregando compras...</p>
+    </div>
+    <div class="crd-chart-state" id="crdInvModalEmpty" role="status" aria-live="polite">
+      <div class="crd-empty-ic">
+        <svg viewBox="0 0 24 24"><path d="M3 13h4l2 3h6l2-3h4V5a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2Z"/><path d="M4 14v6a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-6"/></svg>
+      </div>
+      <p>Esta fatura ainda não possui compras.</p>
+    </div>
+    <ul class="crd-purch-list" id="crdInvModalList"></ul>
+
+    <div class="crd-modal-actions" id="crdInvModalActions">
+      <button type="button" class="btn btn-ghost btn-lg" data-close="crdModalInvoice">Fechar</button>
+      <button type="button" class="btn btn-primary btn-lg" id="crdInvModalPay">Pagar fatura</button>
+    </div>
+  </div>
+</div>
+
+<!-- ============ MODAL: BLOQUEAR / DESBLOQUEAR ============ -->
+<div class="crd-modal" id="crdModalBlock" role="dialog" aria-modal="true" aria-labelledby="crdBlockTitle">
+  <div class="crd-modal-backdrop" data-close="crdModalBlock"></div>
+  <div class="crd-modal-card">
+    <div class="crd-modal-step show" id="crdBlockConfirmStep">
+      <div class="crd-modal-head">
+        <span class="crd-modal-ic is-danger">
+          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg>
+        </span>
+        <div class="crd-modal-title">
+          <h2 id="crdBlockTitle">Bloquear cartão</h2>
+          <p id="crdBlockText">Depois de bloqueado, nenhuma compra é aprovada. Você pode desbloquear a qualquer momento.</p>
+        </div>
+      </div>
+      <div class="crd-modal-actions">
+        <button type="button" class="btn btn-ghost btn-lg" id="crdBlockCancel">Cancelar</button>
+        <button type="button" class="btn btn-lg crd-danger-btn" id="crdBlockConfirm">Confirmar bloqueio</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="assets/config.js"></script>
+<script src="assets/api.js"></script>
+<script src="assets/card.js"></script>
+</body>
+</html>
