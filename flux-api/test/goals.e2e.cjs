@@ -173,14 +173,30 @@ test('depósito que atinge o objetivo conclui a meta automaticamente', async () 
   assert.strictEqual(goalTx.length, 2, '2 depósitos registrados no extrato');
 });
 
+test('meta concluída pode ser excluída sem apagar o ledger', async () => {
+  const created = await api('POST', '/goals', { token: tokenA, body: { name: 'Concluída removível', targetAmount: 5 } });
+  const gid = created.json.goal.id;
+  const dep = await api('POST', `/goals/${gid}/deposit`, { token: tokenA, body: { amount: 5 } });
+  assert.strictEqual(dep.json.goal.status, 'COMPLETED');
+  const beforeBalance = (await api('GET', '/auth/me', { token: tokenA })).json.account.balance;
+  const beforeContributions = await prisma.goalContribution.count({ where: { goalId: gid } });
+  const before = await prisma.transaction.count({ where: { goalId: gid } });
+  const del = await api('DELETE', `/goals/${gid}`, { token: tokenA });
+  assert.strictEqual(del.status, 200);
+  assert.strictEqual(await prisma.transaction.count({ where: { goalId: gid } }), before);
+  assert.strictEqual(await prisma.goalContribution.count({ where: { goalId: gid } }), beforeContributions);
+  assert.strictEqual((await api('GET', '/auth/me', { token: tokenA })).json.account.balance, beforeBalance);
+  assert.strictEqual((await api('GET', '/goals', { token: tokenA })).json.items.some((g) => g.id === gid), false);
+});
+
 test('retirada devolve dinheiro e reabre meta concluída', async () => {
   const gid = await firstGoalId();
   const wd = await api('POST', `/goals/${gid}/withdraw`, { token: tokenA, body: { amount: 30 } });
   assert.strictEqual(wd.status, 201);
   assert.strictEqual(wd.json.goal.status, 'ACTIVE', 'caiu abaixo do objetivo -> ACTIVE');
   assert.strictEqual(wd.json.goal.percent, 70);
-  // saldo: 1000 - 40 - 60 = 900; retirada devolve 30 -> 930
-  assert.strictEqual(wd.json.balance, 930);
+  // inclui os R$5 da meta concluída removível, já excluída por soft-delete.
+  assert.strictEqual(wd.json.balance, 925);
 
   const me = await api('GET', '/auth/me', { token: tokenA });
   assert.strictEqual(me.json.account.balance, wd.json.balance);
@@ -226,6 +242,16 @@ test('exclusão segura: 409 com reserva; liberado após retirar tudo', async () 
   assert.strictEqual(list.json.items.length, 0);
 });
 
+test('meta pausada com reserva continua protegida contra exclusão', async () => {
+  const created = await api('POST', '/goals', { token: tokenA, body: { name: 'Pausada protegida', targetAmount: 50 } });
+  const gid = created.json.goal.id;
+  assert.strictEqual((await api('POST', `/goals/${gid}/deposit`, { token: tokenA, body: { amount: 10 } })).status, 201);
+  assert.strictEqual((await api('PATCH', `/goals/${gid}`, { token: tokenA, body: { status: 'PAUSED' } })).status, 200);
+  assert.strictEqual((await api('DELETE', `/goals/${gid}`, { token: tokenA })).status, 409);
+  await api('POST', `/goals/${gid}/withdraw`, { token: tokenA, body: { amount: 10 } });
+  await api('DELETE', `/goals/${gid}`, { token: tokenA });
+});
+
 test('isolamento: B não vê nem mexe nas metas de A', async () => {
   // A já está registrado/logado nos testes anteriores — cria meta nova
   const created = await api('POST', '/goals', { token: tokenA, body: { name: 'Secreta', targetAmount: 50 } });
@@ -238,6 +264,8 @@ test('isolamento: B não vê nem mexe nas metas de A', async () => {
   const gid = await firstGoalId();
   const patch = await api('PATCH', `/goals/${gid}`, { token: tokenB, body: { status: 'PAUSED' } });
   assert.strictEqual(patch.status, 404, `esperado 404, veio ${patch.status}: ${JSON.stringify(patch.json)}`);
+  const remove = await api('DELETE', `/goals/${gid}`, { token: tokenB });
+  assert.strictEqual(remove.status, 404, `B não pode excluir meta de A: ${JSON.stringify(remove.json)}`);
 });
 let tokenB;
 

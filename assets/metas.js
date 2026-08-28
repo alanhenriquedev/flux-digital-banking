@@ -87,7 +87,7 @@
   }
 
   /* ---------- render ---------- */
-  var ICON_TARGET = '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg>';
+  var ICON_GOAL = '<svg viewBox="0 0 24 24"><path d="M6 21V3h11l-2.5 4L17 11H6"/><path d="M3 21h6"/></svg>';
   var IC_ADD = '<svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>';
   var IC_OUT = '<svg viewBox="0 0 24 24"><path d="M12 19V5M5 12l7-7 7 7"/></svg>';
   var IC_EDIT = '<svg viewBox="0 0 24 24"><path d="M4 20h16M6 16l10-10 2 2-10 10H6Z"/></svg>';
@@ -140,13 +140,13 @@
       if(g.onTrack===false) details.push('<span class="late">fora do prazo estimado</span>');
     }
 
-    var deleteDisabled = (Number(g.currentAmount)>0) ? ' disabled title="Retire o valor reservado antes de excluir"' : '';
+    var deleteDisabled = (Number(g.currentAmount)>0 && !done) ? ' disabled title="Retire o valor reservado antes de excluir"' : '';
     var pauseLabel = paused ? 'Retomar' : 'Pausar';
     var pauseIcon = paused ? IC_PLAY : IC_PAUSE;
 
     return '<li class="met-goal'+(paused?' is-paused':'')+(done?' is-completed':'')+'" data-gid="'+es(g.id)+'">' +
       '<div class="met-goal-top">' +
-        '<span class="met-goal-ic" aria-hidden="true">'+ICON_TARGET+'</span>' +
+      '<span class="met-goal-ic" aria-hidden="true">'+ICON_GOAL+'</span>' +
         '<div class="met-goal-names">' +
           '<div class="met-goal-name">'+es(g.name)+'</div>' +
           (g.description ? '<div class="met-goal-desc">'+es(g.description)+'</div>' : '') +
@@ -167,9 +167,9 @@
       '<div class="met-actions">' +
         (!done ? '<button type="button" class="met-action is-add" data-act="deposit"> '+IC_ADD+' Adicionar</button>' : '') +
         (Number(g.currentAmount)>0 ? '<button type="button" class="met-action" data-act="withdraw">'+IC_OUT+' Retirar</button>' : '') +
-        '<button type="button" class="met-action" data-act="edit">'+IC_EDIT+' Editar</button>' +
+        (!done ? '<button type="button" class="met-action" data-act="edit">'+IC_EDIT+' Editar</button>' : '') +
         (!done ? '<button type="button" class="met-action" data-act="toggle-status">'+pauseIcon+' '+pauseLabel+'</button>' : '') +
-        '<button type="button" class="met-action is-danger" data-act="delete"'+deleteDisabled+'>'+IC_TRASH+' Excluir</button>' +
+        '<button type="button" class="met-action is-danger" data-act="delete"'+deleteDisabled+'>'+IC_TRASH+'<span>Excluir</span></button>' +
       '</div>' +
     '</li>';
   }

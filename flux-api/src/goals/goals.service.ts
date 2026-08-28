@@ -30,7 +30,7 @@ export class GoalsService {
   // ============================================================
   async list(userId: string) {
     const goals = await this.prisma.goal.findMany({
-      where: { userId },
+      where: { userId, deletedAt: null },
       include: { contributions: { orderBy: [{ createdAt: 'asc' }, { id: 'asc' }] } },
       orderBy: [{ status: 'asc' }, { createdAt: 'desc' }, { id: 'asc' }],
     });
@@ -104,15 +104,22 @@ export class GoalsService {
   }
 
   /**
-   * Exclusão SEGURA: permitida somente quando não há valor reservado
-   * (currentAmount == 0). Assim nenhuma movimentação fica órfã e o
-   * usuário nunca perde dinheiro reservado por um clique.
+    * Metas concluídas são ocultadas por soft-delete, preservando saldo,
+    * ledger e histórico da meta. Metas não concluídas só saem sem reserva.
    */
   async remove(userId: string, id: string) {
     const goal = await this.findOwned(userId, id);
+    if (goal.status === 'COMPLETED') {
+      const hidden = await this.prisma.goal.updateMany({
+        where: { id: goal.id, userId, status: 'COMPLETED', deletedAt: null },
+        data: { deletedAt: new Date() },
+      });
+      if (hidden.count !== 1) throw new ConflictException('Meta não pôde ser excluída.');
+      return { message: 'Meta excluída.' };
+    }
     const deleted = await this.prisma.$transaction(async (tx) => {
       const cas = await tx.goal.updateMany({
-        where: { id: goal.id, userId, currentAmount: 0 },
+        where: { id: goal.id, userId, currentAmount: 0, deletedAt: null },
         data: { updatedAt: new Date() },
       });
       if (cas.count !== 1) {
@@ -339,7 +346,7 @@ export class GoalsService {
   // Helpers
   // ============================================================
   private async findOwned(userId: string, id: string) {
-    const goal = await this.prisma.goal.findFirst({ where: { id, userId } });
+    const goal = await this.prisma.goal.findFirst({ where: { id, userId, deletedAt: null } });
     if (!goal) throw new NotFoundException('Meta não encontrada.');
     return goal;
   }

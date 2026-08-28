@@ -170,9 +170,28 @@ test('delete permitido com currentAmount = 0', async () => {
   assert.strictEqual(out.message, 'Meta excluída.');
 });
 
+test('delete de meta concluída oculta a meta sem apagar o conceito financeiro', async () => {
+  let deletedAt;
+  const prisma = prismaFor([goalRow({ status: 'COMPLETED' })]);
+  const originalUpdateMany = prisma.goal.updateMany;
+  prisma.goal.updateMany = async ({ data, ...rest }) => {
+    deletedAt = data.deletedAt;
+    return originalUpdateMany({ data, ...rest });
+  };
+  const svc = new GoalsService(prisma);
+  const out = await svc.remove('u1', 'g1');
+  assert.strictEqual(out.message, 'Meta excluída.');
+  assert.ok(deletedAt instanceof Date);
+});
+
 test('delete de meta inexistente/outro usuário -> 404', async () => {
   const svc = new GoalsService(prismaFor([]));
   await assert.rejects(svc.remove('ghost-id', 'u1'), { name: 'NotFoundException' });
+});
+
+test('delete de meta pausada com reserva continua bloqueado', async () => {
+  const svc = new GoalsService(prismaFor([goalRow({ status: 'PAUSED' })]));
+  await assert.rejects(svc.remove('u1', 'g1'), { name: 'ConflictException' });
 });
 
 test('depósito que ultrapassa o objetivo é recusado sem alterar a conta', async () => {

@@ -41,9 +41,9 @@
     <div class="met-wrap">
 
       <section class="met-hero" aria-labelledby="metTitle">
-        <span class="met-eyebrow">Planejamento</span>
+        <span class="met-eyebrow">Planejamento financeiro</span>
         <h1 class="met-title" id="metTitle">Metas financeiras</h1>
-        <p class="met-sub">Guarde dinheiro com propósito e acompanhe seu progresso.</p>
+        <p class="met-sub">Transforme seus objetivos em planos e acompanhe cada avanço com clareza.</p>
       </section>
 
       <!-- RESUMO -->
@@ -69,7 +69,10 @@
 
       <!-- TOOLBAR -->
       <div class="met-toolbar">
-        <p class="met-count" id="metCount" role="status" aria-live="polite"></p>
+        <div class="met-toolbar-copy">
+          <span class="met-section-kicker">Seu mapa de conquistas</span>
+          <p class="met-count" id="metCount" role="status" aria-live="polite"></p>
+        </div>
         <button type="button" class="btn met-new" id="metNewBtn">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
           Nova meta
@@ -82,7 +85,7 @@
           <div class="verify-spinner"></div><p>Carregando metas...</p>
         </div>
         <div class="dbv-chart-state" id="metEmpty" role="status" aria-live="polite">
-          <div class="met-empty-ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4.5"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/></svg></div>
+          <div class="met-empty-ic"><svg viewBox="0 0 24 24"><path d="M6 21V3h11l-2.5 4L17 11H6"/><path d="M3 21h6"/></svg></div>
           <p>Você ainda não tem metas.<br>Crie a primeira e comece a guardar.</p>
           <button type="button" class="btn btn-ghost" id="metEmptyNew">Criar primeira meta</button>
         </div>
