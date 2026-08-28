@@ -17,7 +17,7 @@
     var d = iso ? new Date(iso) : null;
     if(!d || isNaN(d.getTime())) return '—';
     function p(n){ return (n<10?'0':'')+n; }
-    return p(d.getDate())+'/'+p(d.getMonth())+'/'+d.getFullYear();
+    return p(d.getDate())+'/'+p(d.getMonth()+1)+'/'+d.getFullYear();
   }
   function es(str){
     return String(str==null?'':str)
@@ -301,7 +301,7 @@
       req.then(function(res){
         submit.disabled = false;
         submit.textContent = editingId ? 'Salvar alterações' : 'Criar meta';
-        closeModal($('metFormModal'));
+        closeMetModal($('metFormModal'));
         feedback((res&&res.message)||'Meta salva.');
         loadGoals();
       }).catch(function(err){
@@ -314,9 +314,11 @@
       });
     });
 
+  }
+
   /* ---------- modal: aporte/retirada ---------- */
   function openMoneyModal(mode, goal, trigger){
-    moneyCtx = { mode: mode, goalId: goal.id };
+    moneyCtx = { mode: mode, goalId: goal.id, idempotencyKey: null };
     modalReturnFocus = trigger||null;
     var isDep = mode==='deposit';
     $('metMoneyEyebrow').textContent = isDep ? 'Aporte' : 'Retirada';
@@ -352,17 +354,26 @@
         return;
       }
       var isDep = moneyCtx.mode==='deposit';
+      if(!moneyCtx.idempotencyKey){
+        moneyCtx.idempotencyKey = window.crypto && window.crypto.randomUUID
+          ? window.crypto.randomUUID()
+          : 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+              var r = Math.random() * 16 | 0;
+              var v = c === 'x' ? r : (r & 0x3 | 0x8);
+              return v.toString(16);
+            });
+      }
       var submit = $('metMoneySubmit');
       submit.disabled = true;
       submit.textContent = isDep ? 'Adicionando...' : 'Retirando...';
 
       apiRequest('/goals/'+encodeURIComponent(moneyCtx.goalId)+'/'+(isDep?'deposit':'withdraw'), {
         method:'POST',
-        body: JSON.stringify({ amount: amount }),
+         body: JSON.stringify({ amount: amount, idempotencyKey: moneyCtx.idempotencyKey }),
       }).then(function(res){
         submit.disabled = false;
         submit.textContent = isDep ? 'Adicionar' : 'Retirar';
-        closeModal($('metMoneyModal'));
+        closeMetModal($('metMoneyModal'));
         feedback((res&&res.message)||(isDep?'Aporte realizado.':'Retirada realizada.'));
         loadGoals();
       }).catch(function(err){
@@ -373,6 +384,8 @@
         box.hidden = false;
       });
     });
+
+  }
 
   /* ---------- infra dos modais (foco/Esc/trap) ---------- */
   function bindModals(){

@@ -13,6 +13,7 @@ enum AccountStatus {
 }
 
 enum TransactionType {
+  ACCOUNT_OPENING
   PIX
   TRANSFER
   CARD_PAYMENT
@@ -146,6 +147,8 @@ model User {
   sessions      AuthSession[]
   goals         Goal[]
   alertSettings AlertSetting[]
+  notificationOutbox NotificationOutbox[]
+  alertStates AlertState[]
 
   @@map("users")
 }
@@ -218,8 +221,12 @@ model Transaction {
   counterpartyNumber String?              @map("counterparty_number")
   createdAt          DateTime             @default(now()) @map("created_at")
   updatedAt          DateTime             @updatedAt @map("updated_at")
+  idempotencyKey     String?              @map("idempotency_key")
+  idempotencyHash    String?              @map("idempotency_hash")
+  goalId             String?              @map("goal_id")
 
   @@index([accountId, createdAt])
+  @@unique([accountId, idempotencyKey])
   @@map("transactions")
 }
 
@@ -304,6 +311,27 @@ model Notification {
   @@index([userId, readAt])
   @@index([userId, dedupKey])
   @@map("notifications")
+}
+
+model NotificationOutbox {
+  id           String           @id @default(uuid())
+  userId       String           @map("user_id")
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type         NotificationType
+  title        String
+  message      String?
+  amount       Decimal?         @db.Decimal(15, 2)
+  entityType   String?          @map("entity_type")
+  entityId     String?          @map("entity_id")
+  dedupKey     String           @map("dedup_key")
+  attempts     Int              @default(0)
+  availableAt  DateTime         @default(now()) @map("available_at")
+  lastError    String?          @map("last_error")
+  createdAt    DateTime         @default(now()) @map("created_at")
+
+  @@unique([userId, dedupKey])
+  @@index([availableAt])
+  @@map("notification_outbox")
 }
 
 model Loan {
@@ -407,4 +435,17 @@ model AlertSetting {
   @@unique([userId, kind])
   @@index([userId])
   @@map("alert_settings")
+}
+
+model AlertState {
+  id          String     @id @default(uuid())
+  userId      String     @map("user_id")
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind        AlertKind
+  threshold   Decimal    @db.Decimal(15, 2)
+  isBelow     Boolean    @default(false) @map("is_below")
+  updatedAt   DateTime   @updatedAt @map("updated_at")
+
+  @@unique([userId, kind])
+  @@map("alert_states")
 }

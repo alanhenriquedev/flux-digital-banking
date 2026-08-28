@@ -47,6 +47,7 @@ function prismaFor(rows = [goalRow()], account = { id: 'acc1', balance: dec('100
     },
     $transaction: async (fn) => fn({
       account: {
+        findUnique: async () => account,
         updateMany: async ({ where }) => {
           if (where.balance && account.balance.lt(where.balance.gte)) return { count: 0 };
           return { count: 1 };
@@ -54,7 +55,12 @@ function prismaFor(rows = [goalRow()], account = { id: 'acc1', balance: dec('100
         updateManyAlt: undefined,
       },
       goal: {
-        updateMany: async () => ({ count: 1 }),
+        updateMany: async ({ where }) => {
+          const row = rows.find((r) => r.id === where.id);
+          if (where.currentAmount?.lte && row.currentAmount.gt(where.currentAmount.lte)) return { count: 0 };
+          if (where.currentAmount === 0 && !row.currentAmount.eq(0)) return { count: 0 };
+          return { count: 1 };
+        },
         update: async ({ data, where }) => {
           const base = rows.find((r) => r.id === where.id) || rows[0];
           const merged = { ...base };
@@ -64,6 +70,7 @@ function prismaFor(rows = [goalRow()], account = { id: 'acc1', balance: dec('100
           if (data.status) merged.status = data.status;
           return merged;
         },
+        delete: async () => ({ id: 'g1' }),
       },
       transaction: { create: async (d) => ({ id: 'tx1', ...d.data }) },
       goalContribution: { create: async (d) => ({ id: 'c1', ...d.data }) },
@@ -166,4 +173,9 @@ test('delete permitido com currentAmount = 0', async () => {
 test('delete de meta inexistente/outro usuário -> 404', async () => {
   const svc = new GoalsService(prismaFor([]));
   await assert.rejects(svc.remove('ghost-id', 'u1'), { name: 'NotFoundException' });
+});
+
+test('depósito que ultrapassa o objetivo é recusado sem alterar a conta', async () => {
+  const svc = new GoalsService(prismaFor([goalRow({ currentAmount: dec('4900'), targetAmount: dec('5000') })]));
+  await assert.rejects(svc.deposit('u1', 'g1', 200), { name: 'ConflictException' });
 });

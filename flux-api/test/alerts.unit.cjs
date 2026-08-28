@@ -189,3 +189,28 @@ test('onLogin: mesmo dispositivo e mesma rede -> nada', async () => {
   await svc.onLogin(loginCtx('hash-a', '189.28.99.1'));
   assert.strictEqual(created.length, 0);
 });
+
+test('onBalanceChanged alerta somente na transição abaixo/acima do limite', async () => {
+  const states = [];
+  const created = [];
+  const prisma = {
+    alertSetting: { findUnique: async () => ({ enabled: true, threshold: new Prisma.Decimal(100) }) },
+    alertState: {
+      findUnique: async () => states[0] || null,
+      create: async ({ data }) => { states[0] = { id: 's1', ...data }; return states[0]; },
+      update: async ({ data }) => { Object.assign(states[0], data); return states[0]; },
+      updateMany: async ({ data }) => { Object.assign(states[0], data); return { count: 1 }; },
+    },
+    $transaction: async (fn) => fn({ alertState: prisma.alertState }),
+  };
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+
+  await svc.onBalanceChanged({ userId: 'u1', before: 150, after: 80, entityId: 'a' });
+  await svc.onBalanceChanged({ userId: 'u1', before: 80, after: 70, entityId: 'b' });
+  await svc.onBalanceChanged({ userId: 'u1', before: 70, after: 120, entityId: 'c' });
+  await svc.onBalanceChanged({ userId: 'u1', before: 120, after: 90, entityId: 'd' });
+
+  assert.strictEqual(created.length, 2);
+  assert.strictEqual(Number(created[0].amount), 80);
+  assert.strictEqual(Number(created[1].amount), 90);
+});

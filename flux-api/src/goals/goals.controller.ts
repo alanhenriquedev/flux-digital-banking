@@ -65,7 +65,7 @@ export class GoalsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: GoalAmountDto,
   ) {
-    return this.goals.deposit(user.userId, id, dto.amount);
+    return this.goals.deposit(user.userId, id, dto.amount, dto.idempotencyKey);
   }
 
   @Post(':id/withdraw')
@@ -75,6 +75,6 @@ export class GoalsController {
     @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: GoalAmountDto,
   ) {
-    return this.goals.withdraw(user.userId, id, dto.amount);
+    return this.goals.withdraw(user.userId, id, dto.amount, dto.idempotencyKey);
   }
 }

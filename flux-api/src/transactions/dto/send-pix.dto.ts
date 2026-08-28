@@ -8,9 +8,15 @@ import {
   Max,
   MaxLength,
   Min,
+  IsUUID,
 } from 'class-validator';
 
 export class SendPixDto {
+  @ApiPropertyOptional({ description: 'Chave de idempotência do envio' })
+  @IsOptional()
+  @IsUUID()
+  idempotencyKey?: string;
+
   @ApiProperty({
     example: '12345678',
     description: 'Número da conta de destino',

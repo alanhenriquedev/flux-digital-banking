@@ -77,6 +77,15 @@
 
     var pending = null;
 
+    function newIdempotencyKey(){
+      if(window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c){
+        var r = Math.random() * 16 | 0;
+        var v = c === 'x' ? r : (r & 0x3 | 0x8);
+        return v.toString(16);
+      });
+    }
+
     function hideBanner(banner){
       if(banner) banner.classList.remove('show');
     }
@@ -218,7 +227,7 @@
 
       var account = accountInput.value.trim();
       var amount = parseAmount(amountInput.value);
-      var payload = { accountNumber: account, amount: amount };
+      var payload = { accountNumber: account, amount: amount, idempotencyKey: newIdempotencyKey() };
       if(descInput && descInput.value.trim()){
         payload.description = descInput.value.trim();
       }

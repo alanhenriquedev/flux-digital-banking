@@ -5,9 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { GoalStatus, Prisma } from '@prisma/client';
+import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.module';
 import { CreateGoalDto } from './dto/create-goal.dto';
 import { UpdateGoalDto } from './dto/update-goal.dto';
+import { AlertsService } from '../alerts/alerts.service';
 
 const GOAL_MAX_TARGET = new Prisma.Decimal('100000000.00');
 
@@ -17,7 +19,7 @@ type GoalWithContributions = Prisma.GoalGetPayload<{
 
 @Injectable()
 export class GoalsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService, private readonly alerts?: AlertsService) {}
 
   private static toMoney(n: number): Prisma.Decimal {
     return new Prisma.Decimal(n.toFixed(2));
@@ -108,14 +110,19 @@ export class GoalsService {
    */
   async remove(userId: string, id: string) {
     const goal = await this.findOwned(userId, id);
-
-    if (goal.currentAmount.gt(0)) {
-      throw new ConflictException(
-        'Esta meta ainda tem valor reservado. Retire o dinheiro antes de excluir.',
-      );
-    }
-
-    await this.prisma.goal.delete({ where: { id: goal.id } });
+    const deleted = await this.prisma.$transaction(async (tx) => {
+      const cas = await tx.goal.updateMany({
+        where: { id: goal.id, userId, currentAmount: 0 },
+        data: { updatedAt: new Date() },
+      });
+      if (cas.count !== 1) {
+        throw new ConflictException(
+          'Esta meta ainda tem valor reservado. Retire o dinheiro antes de excluir.',
+        );
+      }
+      return tx.goal.delete({ where: { id: goal.id } });
+    });
+    void deleted;
     return { message: 'Meta excluída.' };
   }
 
@@ -124,7 +131,7 @@ export class GoalsService {
    * transação (impossível saldo negativo), credita a meta, registra a
    * contribuição e cria as transações de ledger (GOAL_DEPOSIT/OUT).
    */
-  async deposit(userId: string, id: string, amountNumber: number) {
+  async deposit(userId: string, id: string, amountNumber: number, idempotencyKey?: string) {
     const amount = GoalsService.toMoney(amountNumber);
     const goal = await this.findOwned(userId, id);
 
@@ -141,8 +148,16 @@ export class GoalsService {
       throw new BadRequestException('Sua conta está bloqueada.');
     }
 
-    await this.prisma.$transaction(
+    const operationHash = hashOperation({ goalId: id, type: 'DEPOSIT', amount: amount.toString() });
+    if (idempotencyKey) {
+      const previous = await this.prisma.transaction.findFirst({ where: { accountId: account.id, idempotencyKey } });
+      if (previous) return this.replayMovement(previous, operationHash, id, 'Aporte');
+    }
+
+    let movement: { before: number; after: number };
+    try { movement = await this.prisma.$transaction(
       async (tx) => {
+        const accountBefore = await tx.account.findUnique({ where: { id: account.id }, select: { balance: true } });
         const debit = await tx.account.updateMany({
           where: {
             id: account.id,
@@ -156,7 +171,12 @@ export class GoalsService {
         }
 
         const updated = await tx.goal.updateMany({
-          where: { id: goal.id, userId, status: 'ACTIVE' },
+          where: {
+            id: goal.id,
+            userId,
+            status: 'ACTIVE',
+            currentAmount: { lte: goal.targetAmount.sub(amount) },
+          },
           data: { currentAmount: { increment: amount } },
         });
         if (updated.count !== 1) {
@@ -171,15 +191,27 @@ export class GoalsService {
             status: 'COMPLETED',
             amount,
             description: `Meta: ${goal.name}`,
+            idempotencyKey,
+            idempotencyHash: operationHash,
+            goalId: goal.id,
           },
         });
 
         await tx.goalContribution.create({
           data: { goalId: goal.id, type: 'DEPOSIT', amount },
         });
+        return { before: Number(accountBefore?.balance ?? 0), after: Number(accountBefore?.balance ?? 0) - Number(amount) };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
-    );
+    ); } catch (err) {
+      if (idempotencyKey && isUniqueViolation(err)) {
+        const previous = await this.prisma.transaction.findFirst({ where: { accountId: account.id, idempotencyKey } });
+        if (previous) return this.replayMovement(previous, operationHash, id, 'Aporte');
+      }
+      throw err;
+    }
+
+    if (this.alerts) await this.alerts.onBalanceChanged({ userId, before: movement!.before, after: movement!.after, entityType: 'goal', entityId: goal.id });
 
     // Conclusão automática quando o aporte atinge o objetivo
     let fresh = await this.loadGoal(goal.id);
@@ -212,7 +244,7 @@ export class GoalsService {
    * Permitida em metas ACTIVE e PAUSED (o dinheiro é do usuário).
    * Se a meta estava COMPLETED e cair abaixo do objetivo, volta a ACTIVE.
    */
-  async withdraw(userId: string, id: string, amountNumber: number) {
+  async withdraw(userId: string, id: string, amountNumber: number, idempotencyKey?: string) {
     const amount = GoalsService.toMoney(amountNumber);
     const goal = await this.findOwned(userId, id);
 
@@ -225,8 +257,16 @@ export class GoalsService {
     const account = await this.prisma.account.findUnique({ where: { userId } });
     if (!account) throw new NotFoundException('Conta não encontrada.');
 
-    await this.prisma.$transaction(
+    const operationHash = hashOperation({ goalId: id, type: 'WITHDRAW', amount: amount.toString() });
+    if (idempotencyKey) {
+      const previous = await this.prisma.transaction.findFirst({ where: { accountId: account.id, idempotencyKey } });
+      if (previous) return this.replayMovement(previous, operationHash, id, 'Retirada');
+    }
+
+    let movement: { before: number; after: number };
+    try { movement = await this.prisma.$transaction(
       async (tx) => {
+        const accountBefore = await tx.account.findUnique({ where: { id: account.id }, select: { balance: true } });
         const reduced = await tx.goal.updateMany({
           where: { id: goal.id, userId, currentAmount: { gte: amount } },
           data: { currentAmount: { decrement: amount } },
@@ -253,15 +293,27 @@ export class GoalsService {
             status: 'COMPLETED',
             amount,
             description: `Meta: ${goal.name}`,
+            idempotencyKey,
+            idempotencyHash: operationHash,
+            goalId: goal.id,
           },
         });
 
         await tx.goalContribution.create({
           data: { goalId: goal.id, type: 'WITHDRAW', amount },
         });
+        return { before: Number(accountBefore?.balance ?? 0), after: Number(accountBefore?.balance ?? 0) + Number(amount) };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
-    );
+    ); } catch (err) {
+      if (idempotencyKey && isUniqueViolation(err)) {
+        const previous = await this.prisma.transaction.findFirst({ where: { accountId: account.id, idempotencyKey } });
+        if (previous) return this.replayMovement(previous, operationHash, id, 'Retirada');
+      }
+      throw err;
+    }
+
+    if (this.alerts) await this.alerts.onBalanceChanged({ userId, before: movement!.before, after: movement!.after, entityType: 'goal', entityId: goal.id });
 
     let fresh = await this.loadGoal(goal.id);
     if (
@@ -307,6 +359,14 @@ export class GoalsService {
     return acc ? Number(acc.balance) : null;
   }
 
+  private async replayMovement(previous: { idempotencyHash: string | null }, operationHash: string, goalId: string, label: string) {
+    if (previous.idempotencyHash !== operationHash) {
+      throw new ConflictException('A chave de idempotência já foi usada com outra movimentação.');
+    }
+    const goal = await this.loadGoal(goalId);
+    return { message: `${label} realizado.`, goal: goal ? this.toResponse(goal) : null, balance: await this.currentBalance(goal?.userId ?? '') };
+  }
+
   private resolveDeadline(raw?: string | null): Date | null {
     if (raw == null) return null;
     const d = new Date(raw);
@@ -348,6 +408,14 @@ export class GoalsService {
       onTrack: onTrack(goal.deadline, forecast.date),
     };
   }
+}
+
+function hashOperation(value: unknown): string {
+  return createHash('sha256').update(JSON.stringify(value)).digest('hex');
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
 }
 
 // ============================================================

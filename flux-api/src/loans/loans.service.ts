@@ -216,7 +216,7 @@ export class LoansService {
 
         const account = await tx.account.findUnique({
           where: { userId },
-          select: { id: true, status: true },
+          select: { id: true, status: true, balance: true },
         });
         if (!account) {
           throw new NotFoundException('Conta não encontrada.');
@@ -254,7 +254,12 @@ export class LoansService {
           data: installments,
         });
 
-        return { disbursementTx, installments };
+        return {
+          disbursementTx,
+          installments,
+          balanceBefore: Number(account.balance),
+          balanceAfter: Number(account.balance) + Number(loan.amount),
+        };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
     );
@@ -275,6 +280,11 @@ export class LoansService {
       amount: Number(loan.amount),
       entityType: 'loan',
       entityId: loan.id,
+    });
+
+    if (this.alerts) await this.alerts.onBalanceChanged({
+      userId, before: created.balanceBefore, after: created.balanceAfter,
+      entityType: 'loan', entityId: loan.id,
     });
 
     // Lote 1 · Alerta configurável de empréstimo contratado
@@ -320,6 +330,7 @@ export class LoansService {
     const loan = await this.prisma.loan.findFirst({
       where: { id: loanId, userId },
     });
+
     if (!loan) {
       throw new NotFoundException('Empréstimo não encontrado.');
     }
@@ -341,11 +352,11 @@ export class LoansService {
     const amount = installment.amount;
     const payDate = new Date();
 
-    const { paidOff } = await this.prisma.$transaction(
+    const { paidOff, balanceBefore, balanceAfter } = await this.prisma.$transaction(
       async (tx) => {
         const account = await tx.account.findUnique({
           where: { userId },
-          select: { id: true, status: true },
+          select: { id: true, status: true, balance: true },
         });
         if (!account) {
           throw new NotFoundException('Conta não encontrada.');
@@ -413,7 +424,7 @@ export class LoansService {
           paidOff = quit.count === 1;
         }
 
-        return { paidOff };
+        return { paidOff, balanceBefore: Number(account.balance), balanceAfter: Number(account.balance) - Number(amount) };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
     );
@@ -453,6 +464,11 @@ export class LoansService {
         entityId: loanId,
       });
     }
+
+    if (this.alerts) await this.alerts.onBalanceChanged({
+      userId, before: balanceBefore, after: balanceAfter,
+      entityType: 'loan_installment', entityId: installment.id,
+    });
 
     // Lote 1 · lembrete lazy da próxima parcela (respeita preferências)
     if (this.alerts) await this.alerts.checkInstallmentDue(userId);

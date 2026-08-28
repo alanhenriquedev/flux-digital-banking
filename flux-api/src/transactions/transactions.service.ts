@@ -6,6 +6,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.module';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AlertsService } from '../alerts/alerts.service';
@@ -33,6 +34,7 @@ export class TransactionsService {
 
     const accountNumber = dto.accountNumber.trim();
     const description = dto.description?.trim() || null;
+    const operationHash = hashOperation({ accountNumber, amount: amount.toString(), description });
 
     const [sender, recipient] = await Promise.all([
       this.prisma.account.findUnique({
@@ -65,12 +67,22 @@ export class TransactionsService {
       throw new UnprocessableEntityException('A conta de destino está bloqueada.');
     }
 
+    if (dto.idempotencyKey) {
+      const previous = await this.prisma.transaction.findFirst({
+        where: { accountId: sender.id, idempotencyKey: dto.idempotencyKey },
+      });
+      if (previous) return this.replayPix(previous, operationHash);
+    }
+
     // ids reais das transações, usados como entityId das notificações
     let outTx: { id: string } | null = null;
     let inTx: { id: string } | null = null;
+    let movement: { before: number; after: number };
 
-    await this.prisma.$transaction(
-      async (tx) => {
+    try {
+      movement = await this.prisma.$transaction(
+        async (tx) => {
+        const senderBefore = await tx.account.findUnique({ where: { id: sender.id }, select: { balance: true } });
         const debit = await tx.account.updateMany({
           where: {
             id: sender.id,
@@ -109,6 +121,8 @@ export class TransactionsService {
             description,
             counterpartyName: recipient.user.fullName,
             counterpartyNumber: recipient.number,
+            idempotencyKey: dto.idempotencyKey,
+            idempotencyHash: operationHash,
           },
         });
 
@@ -124,9 +138,19 @@ export class TransactionsService {
             counterpartyNumber: sender.number,
           },
         });
-      },
-      { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
-    );
+        return { before: Number(senderBefore?.balance ?? 0), after: Number(senderBefore?.balance ?? 0) - Number(amount) };
+        },
+        { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
+      );
+    } catch (err) {
+      if (dto.idempotencyKey && isUniqueViolation(err)) {
+        const previous = await this.prisma.transaction.findFirst({
+          where: { accountId: sender.id, idempotencyKey: dto.idempotencyKey },
+        });
+        if (previous) return this.replayPix(previous, operationHash);
+      }
+      throw err;
+    }
 
     // Notificações — criadas DEPOIS do commit da operação financeira.
     // Lote 1: respeitam as preferências de alertas do usuário e nunca
@@ -140,6 +164,7 @@ export class TransactionsService {
         amount: Number(amount),
         entityType: 'transaction',
         entityId: outTx!.id,
+        dedupKey: `pix-out:${outTx!.id}`,
       });
     }
     if (!this.alerts || (await this.alerts.isEnabled(recipient.user.id, 'PIX_RECEIVED'))) {
@@ -151,23 +176,21 @@ export class TransactionsService {
         amount: Number(amount),
         entityType: 'transaction',
         entityId: inTx!.id,
+        dedupKey: `pix-in:${inTx!.id}`,
       });
     }
 
     // Alertas com limiar (acima de X / saldo abaixo de Y) — pós-commit
     if (this.alerts) {
       try {
-        const senderNow = await this.prisma.account.findUnique({
-          where: { userId },
-          select: { balance: true },
-        });
         await this.alerts.onPixSent({
           userId,
           txId: outTx!.id,
           amount: Number(amount),
           counterpartyName: recipient.user.fullName,
           counterpartyNumber: recipient.number,
-          balanceAfter: senderNow ? Number(senderNow.balance) : null,
+          balanceBefore: movement.before,
+          balanceAfter: movement.after,
         });
       } catch {
         /* best-effort */
@@ -181,6 +204,23 @@ export class TransactionsService {
         number: recipient.number,
         name: recipient.user.fullName,
       },
+    };
+  }
+
+  private async replayPix(previous: {
+    id: string;
+    idempotencyHash: string | null;
+    amount: Prisma.Decimal;
+    counterpartyName: string | null;
+    counterpartyNumber: string | null;
+  }, operationHash: string) {
+    if (previous.idempotencyHash !== operationHash) {
+      throw new ConflictException('A chave de idempotência já foi usada com outro PIX.');
+    }
+    return {
+      message: 'PIX enviado com sucesso.',
+      amount: Number(previous.amount),
+      to: { number: previous.counterpartyNumber, name: previous.counterpartyName },
     };
   }
 
@@ -226,6 +266,14 @@ export class TransactionsService {
       },
     };
   }
+}
+
+function hashOperation(value: unknown): string {
+  return createHash('sha256').update(JSON.stringify(value)).digest('hex');
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
 }
 
 function formatBRL(value: Prisma.Decimal | number): string {

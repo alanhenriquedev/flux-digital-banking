@@ -1,18 +1,30 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.module';
 
 @Injectable()
 export class AccountsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  createForUser(userId: string) {
+  async createForUser(userId: string) {
     const number = this.generateAccountNumber();
 
-    return this.prisma.account.create({
-      data: {
-        userId,
-        number,
-      },
+    return this.prisma.$transaction(async (tx) => {
+      const account = await tx.account.create({
+        data: { userId, number },
+      });
+      await tx.transaction.create({
+        data: {
+          accountId: account.id,
+          type: 'ACCOUNT_OPENING',
+          direction: 'IN',
+          status: 'COMPLETED',
+          amount: new Prisma.Decimal('1000.00'),
+          description: 'Crédito inicial de abertura da conta',
+          counterpartyName: 'Flux',
+        },
+      });
+      return account;
     });
   }
 

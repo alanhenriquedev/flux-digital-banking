@@ -157,6 +157,23 @@ test('PIX_SENT reativado volta a notificar envios', async () => {
   assert.ok(pixOut.length >= 1, 'notificação clássica restaurada');
 });
 
+test('PIX é idempotente por usuário, inclusive sob concorrência', async () => {
+  const key = '33333333-3333-4333-8333-333333333333';
+  const before = await prisma.user.findUnique({ where: { email: EMAIL_A } });
+  const results = await Promise.all([
+    api('POST', '/pix/send', { token: tokenA, body: { accountNumber: accBNumber, amount: 3, idempotencyKey: key } }),
+    api('POST', '/pix/send', { token: tokenA, body: { accountNumber: accBNumber, amount: 3, idempotencyKey: key } }),
+  ]);
+  assert.ok(results.every((r) => r.status === 201));
+  const mismatch = await api('POST', '/pix/send', { token: tokenA, body: { accountNumber: accBNumber, amount: 4, idempotencyKey: key } });
+  assert.strictEqual(mismatch.status, 409);
+  const account = await prisma.account.findUnique({ where: { userId: before.id } });
+  const txs = await prisma.transaction.findMany({ where: { accountId: account.id, idempotencyKey: key } });
+  assert.strictEqual(txs.length, 1);
+  const cross = await api('POST', '/pix/send', { token: tokenB, body: { accountNumber: account.number, amount: 3, idempotencyKey: key } });
+  assert.strictEqual(cross.status, 201, JSON.stringify(cross));
+});
+
 test('BALANCE_BELOW: alerta quando o saldo fica abaixo do limiar', async () => {
   const me = await api('GET', '/auth/me', { token: tokenA });
   const bal = me.json.account.balance;

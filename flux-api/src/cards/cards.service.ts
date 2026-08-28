@@ -12,6 +12,7 @@ import { CreateCardPurchaseDto } from './dto/create-card-purchase.dto';
 import { CardPurchaseResponse } from './dto/card-purchase-response.dto';
 import { InvoiceDetailResponse, InvoiceResponse } from './dto/invoice-response.dto';
 import { PayInvoiceResponse } from './dto/pay-invoice-response.dto';
+import { AlertsService } from '../alerts/alerts.service';
 import { computeClosingDate, computeDueDate } from './invoice-date.util';
 
 const CARD_CREDIT_LIMIT = new Prisma.Decimal('5000.00');
@@ -22,6 +23,7 @@ export class CardsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly alerts?: AlertsService,
   ) {}
 
   async findOrCreateVirtual(userId: string): Promise<CardResponse> {
@@ -348,8 +350,9 @@ export class CardsService {
       throw new UnprocessableEntityException('Esta fatura não possui valor a pagar.');
     }
 
-    await this.prisma.$transaction(
+    const movement = await this.prisma.$transaction(
       async (tx) => {
+        const accountBefore = await tx.account.findUnique({ where: { id: account.id }, select: { balance: true } });
         const debit = await tx.account.updateMany({
           where: {
             id: account.id,
@@ -403,6 +406,7 @@ export class CardsService {
             counterpartyNumber: card?.last4 ?? null,
           },
         });
+        return { before: Number(accountBefore?.balance ?? 0), after: Number(accountBefore?.balance ?? 0) - Number(invoice.totalAmount) };
       },
       { isolationLevel: Prisma.TransactionIsolationLevel.ReadCommitted },
     );
@@ -421,6 +425,11 @@ export class CardsService {
       amount: Number(invoice.totalAmount),
       entityType: 'invoice',
       entityId: invoice.id,
+    });
+
+    if (this.alerts) await this.alerts.onBalanceChanged({
+      userId, before: movement.before, after: movement.after,
+      entityType: 'invoice', entityId: invoice.id,
     });
 
     return {

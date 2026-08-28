@@ -286,6 +286,7 @@ export class AlertsService {
     counterpartyName: string;
     counterpartyNumber: string;
     balanceAfter: number | null;
+    balanceBefore?: number | null;
   }): Promise<void> {
     // A notificação clássica de PIX enviado vive no TransactionsService
     // (gated por PIX_SENT). Aqui ficam apenas os alertas com limiar.
@@ -300,16 +301,92 @@ export class AlertsService {
       entityType: 'transaction',
       entityId: opts.txId,
     });
-    if (opts.balanceAfter != null) {
-      await this.dispatch({
-        userId: opts.userId,
-        kind: 'BALANCE_BELOW',
-        dedupKey: `ballow:${opts.txId}`,
-        gateBalanceAfter: opts.balanceAfter,
-        title: `Saldo abaixo do seu limite: ${formatBRL(opts.balanceAfter)}`,
-        message: 'Considere revisar seus gastos ou pausar metas temporariamente.',
-        amount: opts.balanceAfter,
+    if (opts.balanceAfter != null) await this.onBalanceChanged({
+      userId: opts.userId,
+      before: opts.balanceBefore ?? null,
+      after: opts.balanceAfter,
+      entityId: opts.txId,
+    });
+  }
+
+  async onBalanceChanged(opts: {
+    userId: string;
+    before: number | null;
+    after: number;
+    entityType?: string;
+    entityId?: string;
+  }, retry = 0): Promise<void> {
+    try {
+      if (!this.prisma.alertState) {
+        if (opts.after <= 100 && (opts.before == null || opts.before > 100)) {
+          await this.dispatch({
+            userId: opts.userId, kind: 'BALANCE_BELOW',
+            dedupKey: `ballow:${opts.entityId ?? Date.now()}`,
+            gateBalanceAfter: opts.after,
+            title: `Saldo abaixo do seu limite: ${formatBRL(opts.after)}`,
+            message: 'Considere revisar seus gastos ou pausar metas temporariamente.',
+            amount: opts.after,
+          });
+        }
+        return;
+      }
+
+      const setting = await this.prisma.alertSetting.findUnique({
+        where: { userId_kind: { userId: opts.userId, kind: 'BALANCE_BELOW' } },
+        select: { enabled: true, threshold: true },
       });
+      const threshold = Number(setting?.threshold ?? 100);
+      let risingEdge = false;
+
+      await this.prisma.$transaction(async (tx) => {
+        const state = await tx.alertState.findUnique({
+          where: { userId_kind: { userId: opts.userId, kind: 'BALANCE_BELOW' } },
+        });
+        const crossed = opts.before != null && opts.before > threshold && opts.after <= threshold;
+        if (!state) {
+          await tx.alertState.create({
+            data: { userId: opts.userId, kind: 'BALANCE_BELOW', threshold, isBelow: opts.after <= threshold },
+          });
+          risingEdge = crossed;
+          return;
+        }
+        if (Number(state.threshold) !== threshold) {
+          await tx.alertState.update({
+            where: { id: state.id },
+            data: { threshold, isBelow: opts.after <= threshold },
+          });
+          // A new threshold creates a new condition even if the balance was
+          // already below the previous threshold.
+          risingEdge = opts.after <= threshold;
+          return;
+        }
+        if (opts.after > threshold) {
+          await tx.alertState.update({ where: { id: state.id }, data: { isBelow: false } });
+        } else if (!state.isBelow && crossed) {
+          const claimed = await tx.alertState.updateMany({
+            where: { id: state.id, isBelow: false },
+            data: { isBelow: true },
+          });
+          risingEdge = claimed.count === 1;
+        }
+      }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
+
+      if (risingEdge && setting?.enabled !== false) {
+        await this.dispatch({
+          userId: opts.userId, kind: 'BALANCE_BELOW',
+          dedupKey: `ballow:${opts.entityId ?? Date.now()}`,
+          gateBalanceAfter: opts.after,
+          title: `Saldo abaixo do seu limite: ${formatBRL(opts.after)}`,
+          message: 'Considere revisar seus gastos ou pausar metas temporariamente.',
+          amount: opts.after,
+        });
+      }
+    } catch (err) {
+      if (retry < 2 && isRetryableTransactionError(err)) {
+        await this.onBalanceChanged(opts, retry + 1);
+        return;
+      }
+      this.logger.error(`onBalanceChanged falhou para user ${opts.userId}`, err instanceof Error ? err.stack : String(err));
     }
   }
 
@@ -382,6 +459,10 @@ export class AlertsService {
       );
     }
   }
+}
+
+function isRetryableTransactionError(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && (err.code === 'P2002' || err.code === 'P2034');
 }
 
 function ipPrefix(ip: string | null): string | null {

@@ -103,6 +103,33 @@ test('criar meta e listar com campos calculados', async () => {
   assert.strictEqual(g.remaining, 100);
   assert.strictEqual(g.forecastMonths, null, 'sem aportes ainda -> sem previsão');
   assert.strictEqual(g.status, 'ACTIVE');
+
+  const account = await prisma.account.findUnique({ where: { userId: (await prisma.user.findUnique({ where: { email: EMAIL_A } })).id } });
+  const opening = await prisma.transaction.findMany({ where: { accountId: account.id, type: 'ACCOUNT_OPENING' } });
+  assert.strictEqual(Number(account.balance), 1000);
+  assert.strictEqual(opening.length, 1);
+  assert.strictEqual(Number(opening[0].amount), 1000);
+});
+
+test('movimentação de meta é idempotente e rejeita payload divergente', async () => {
+  const created = await api('POST', '/goals', { token: tokenA, body: { name: 'Idempotente', targetAmount: 100 } });
+  const gid = created.json.goal.id;
+  const key = '11111111-1111-4111-8111-111111111111';
+  const results = await Promise.all([
+    api('POST', `/goals/${gid}/deposit`, { token: tokenA, body: { amount: 5, idempotencyKey: key } }),
+    api('POST', `/goals/${gid}/deposit`, { token: tokenA, body: { amount: 5, idempotencyKey: key } }),
+  ]);
+  assert.ok(results.every((r) => r.status === 201));
+  const mismatch = await api('POST', `/goals/${gid}/deposit`, { token: tokenA, body: { amount: 6, idempotencyKey: key } });
+  assert.strictEqual(mismatch.status, 409);
+  const row = await prisma.goal.findUnique({ where: { id: gid } });
+  const txs = await prisma.transaction.findMany({ where: { goalId: gid, idempotencyKey: key } });
+  assert.strictEqual(Number(row.currentAmount), 5);
+  assert.strictEqual(txs.length, 1);
+  const wd = await api('POST', `/goals/${gid}/withdraw`, { token: tokenA, body: { amount: 5, idempotencyKey: '22222222-2222-4222-8222-222222222222' } });
+  assert.strictEqual(wd.status, 201);
+  const del = await api('DELETE', `/goals/${gid}`, { token: tokenA });
+  assert.strictEqual(del.status, 200);
 });
 
 test('depósito parcial: percent/restante/previsão e débito no saldo', async () => {
@@ -142,7 +169,7 @@ test('depósito que atinge o objetivo conclui a meta automaticamente', async () 
   assert.strictEqual(dep.json.goal.percent, 100);
 
   const ledger = await api('GET', '/transactions?page=1&limit=50', { token: tokenA });
-  const goalTx = ledger.json.items.filter((t) => t.type === 'GOAL_DEPOSIT');
+  const goalTx = ledger.json.items.filter((t) => t.type === 'GOAL_DEPOSIT' && t.description === 'Meta: Viagem');
   assert.strictEqual(goalTx.length, 2, '2 depósitos registrados no extrato');
 });
 

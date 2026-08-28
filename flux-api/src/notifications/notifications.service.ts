@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { Notification, NotificationType, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.module';
 import { ListNotificationsQuery } from './dto/list-notifications.query';
@@ -20,10 +20,20 @@ export interface CreateNotificationData {
 }
 
 @Injectable()
-export class NotificationsService {
+export class NotificationsService implements OnModuleInit, OnModuleDestroy {
   private readonly logger = new Logger(NotificationsService.name);
+  private retryTimer?: NodeJS.Timeout;
 
   constructor(private readonly prisma: PrismaService) {}
+
+  onModuleInit() {
+    this.retryTimer = setInterval(() => { void this.processOutbox(); }, 30_000);
+    void this.processOutbox();
+  }
+
+  onModuleDestroy() {
+    if (this.retryTimer) clearInterval(this.retryTimer);
+  }
 
   /**
    * Cria uma notificação para um usuário.
@@ -55,13 +65,68 @@ export class NotificationsService {
    * interromper a operação financeira que a originou.
    */
   async safeCreate(data: CreateNotificationData): Promise<void> {
+    const reliable = { ...data, dedupKey: data.dedupKey ?? stableDedupKey(data) };
     try {
-      await this.createNotification(data);
+      await this.createNotification(reliable);
     } catch (err) {
+      if (isUniqueViolation(err)) return;
+      try {
+        await this.prisma.notificationOutbox.create({
+          data: {
+            userId: reliable.userId,
+            type: reliable.type,
+            title: reliable.title,
+            message: reliable.message ?? null,
+            amount: reliable.amount == null ? null : new Prisma.Decimal(String(reliable.amount)),
+            entityType: reliable.entityType ?? null,
+            entityId: reliable.entityId ?? null,
+            dedupKey: reliable.dedupKey!,
+          },
+        });
+        return;
+      } catch (outboxErr) {
+        this.logger.error('Falha ao enfileirar notificação para reprocessamento', outboxErr instanceof Error ? outboxErr.stack : String(outboxErr));
+      }
       this.logger.error(
-        `Falha ao criar notificação (${data.type}) para user ${data.userId}: ${data.title}`,
+        `Falha ao criar notificação (${reliable.type}) para user ${reliable.userId}: ${reliable.title}`,
         err instanceof Error ? err.stack : String(err),
       );
+    }
+  }
+
+  private async processOutbox(): Promise<void> {
+    try {
+      const pending = await this.prisma.notificationOutbox.findMany({
+        where: { availableAt: { lte: new Date() } },
+        orderBy: { createdAt: 'asc' },
+        take: 50,
+      });
+      for (const item of pending) {
+        try {
+          await this.createNotification({
+            userId: item.userId, type: item.type, title: item.title,
+            message: item.message, amount: item.amount ?? undefined,
+            entityType: item.entityType, entityId: item.entityId,
+            dedupKey: item.dedupKey,
+          });
+          await this.prisma.notificationOutbox.delete({ where: { id: item.id } });
+        } catch (err) {
+          if (isUniqueViolation(err)) {
+            await this.prisma.notificationOutbox.delete({ where: { id: item.id } });
+            continue;
+          }
+          await this.prisma.notificationOutbox.update({
+            where: { id: item.id },
+            data: {
+              attempts: { increment: 1 },
+              availableAt: new Date(Date.now() + Math.min(3_600_000, 2 ** Math.min(item.attempts, 10) * 1_000)),
+              lastError: err instanceof Error ? err.message.slice(0, 500) : String(err),
+            },
+          });
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`Processamento da outbox falhou: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
@@ -122,6 +187,15 @@ export class NotificationsService {
       updated: result.count,
     };
   }
+}
+
+function stableDedupKey(data: CreateNotificationData): string {
+  if (data.entityType && data.entityId) return `${data.type}:${data.entityType}:${data.entityId}`;
+  return `${data.type}:${data.title}:${data.message ?? ''}`;
+}
+
+function isUniqueViolation(err: unknown): boolean {
+  return err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002';
 }
 
 function toResponse(n: Notification): {
