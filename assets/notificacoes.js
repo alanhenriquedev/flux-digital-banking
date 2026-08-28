@@ -39,6 +39,13 @@
       case 'CARD_UNBLOCKED': return 'Cartão';
       case 'INVOICE_PAID':   return 'Fatura';
       case 'AUTH_LOGIN':     return 'Acesso';
+      case 'ALERT_SECURITY': return 'Segurança';
+      case 'ALERT_MOVEMENT': return 'Alerta';
+      case 'ALERT_ACCOUNT':  return 'Conta';
+      case 'LOAN_APPROVED':
+      case 'LOAN_DISBURSED':
+      case 'LOAN_INSTALLMENT_PAID':
+      case 'LOAN_PAID_OFF':  return 'Empréstimo';
       default: return '';
     }
   }
@@ -52,6 +59,13 @@
       case 'CARD_UNBLOCKED':   return 'ntf-item-ic-out';
       case 'INVOICE_PAID':     return 'ntf-item-ic-in';
       case 'AUTH_LOGIN':       return 'ntf-item-ic-auth';
+      case 'ALERT_SECURITY':   return 'ntf-item-ic-auth';
+      case 'ALERT_MOVEMENT':
+      case 'ALERT_ACCOUNT':    return 'ntf-item-ic-warn';
+      case 'LOAN_APPROVED':
+      case 'LOAN_DISBURSED':
+      case 'LOAN_INSTALLMENT_PAID':
+      case 'LOAN_PAID_OFF':    return 'ntf-item-ic-in';
       default:                 return 'ntf-item-ic-bell';
     }
   }

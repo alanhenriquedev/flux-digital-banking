@@ -20,12 +20,13 @@
     "test:goals:unit": "node --test test/goals.unit.cjs",
     "test:alerts:unit": "node --test test/alerts.unit.cjs",
     "test:notifications:unit": "node --test test/notifications.unit.cjs",
+    "test:notifications:e2e": "node --test test/notifications.e2e.cjs",
     "test:security:e2e": "node --test test/security.e2e.cjs",
     "test:sessions:e2e": "node --test test/sessions.e2e.cjs",
     "test:devices:e2e": "node --test test/devices.e2e.cjs",
     "test:goals:e2e": "node --test test/goals.e2e.cjs",
     "test:alerts:e2e": "node --test test/alerts.e2e.cjs",
-    "test": "npm run build && npm run test:security:unit && npm run test:devices:unit && npm run test:goals:unit && npm run test:alerts:unit && npm run test:notifications:unit && npm run test:security:e2e && npm run test:sessions:e2e && npm run test:devices:e2e && npm run test:goals:e2e && npm run test:alerts:e2e"
+    "test": "npm run build && npm run test:security:unit && npm run test:devices:unit && npm run test:goals:unit && npm run test:alerts:unit && npm run test:notifications:unit && npm run test:security:e2e && npm run test:sessions:e2e && npm run test:devices:e2e && npm run test:goals:e2e && npm run test:alerts:e2e && npm run test:notifications:e2e"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.0",
