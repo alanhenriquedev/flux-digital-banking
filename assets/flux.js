@@ -20,7 +20,7 @@ if(boot){
 
     requestAnimationFrame(()=>{
       // 1) marca expande + FLUX entra
-      setTimeout(()=>{ boot.classList.add('play'); }, 60);
+       setTimeout(()=>{ boot.classList.add('play'); }, 40);
       // 2) logo voa até o header e overlay desvanece
       setTimeout(()=>{
         if(bootLogo && headerLogo){
@@ -30,17 +30,17 @@ if(boot){
           const dy = (t.top + t.height/2) - (s.top + s.height/2);
           const scale = s.width > 0 ? t.width / s.width : 1;
           if(bootMark) bootMark.classList.add('is-final');
-          bootLogo.style.transition = 'transform .52s cubic-bezier(.16,.8,.3,1)';
+           bootLogo.style.transition = 'transform .42s cubic-bezier(.16,.8,.3,1)';
           bootLogo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + scale + ')';
         }
         boot.classList.add('is-exit');
-      }, 1250);
+       }, 780);
       // 3) cleanup
       setTimeout(()=>{
         boot.remove();
         document.body.style.overflow = prevOverflow;
         document.body.classList.add('booted');
-      }, 1880);
+       }, 1320);
     });
   }
 }
