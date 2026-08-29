@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   NotFoundException,
+  ForbiddenException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -10,6 +11,7 @@ import { createHash } from 'crypto';
 import { PrismaService } from '../prisma/prisma.module';
 import { NotificationsService } from '../notifications/notifications.service';
 import { AlertsService } from '../alerts/alerts.service';
+import { RiskEngineService } from '../risk/risk-engine.service';
 import { SendPixDto } from './dto/send-pix.dto';
 import { ListTransactionsQuery } from './dto/list-transactions.query';
 
@@ -20,10 +22,11 @@ export class TransactionsService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly notifications: NotificationsService,
+    private readonly risk: RiskEngineService,
     private readonly alerts?: AlertsService,
   ) {}
 
-  async sendPix(userId: string, dto: SendPixDto) {
+  async sendPix(userId: string, dto: SendPixDto, context?: { sessionId: string | null; ip: string | null }) {
     const amount = new Prisma.Decimal(dto.amount.toFixed(2));
     if (amount.lte(0)) {
       throw new BadRequestException('Valor deve ser maior que zero.');
@@ -72,6 +75,29 @@ export class TransactionsService {
         where: { accountId: sender.id, idempotencyKey: dto.idempotencyKey },
       });
       if (previous) return this.replayPix(previous, operationHash);
+    }
+
+    if (this.risk) {
+      const assessment = await this.risk.assess(userId, {
+        accountNumber,
+        amount: Number(amount),
+        description,
+        sessionId: context?.sessionId ?? null,
+        ip: context?.ip ?? null,
+      });
+      const decision = this.risk.decision(userId, assessment, dto.riskConfirmation);
+      if (decision === 'BLOCK') {
+        await this.risk.notifyHighRisk(userId, assessment, 'PIX bloqueado por segurança');
+        throw new ForbiddenException('Pagamento bloqueado por segurança.');
+      }
+      if (decision === 'CONFIRM') {
+        await this.risk.notifyHighRisk(userId, assessment, 'PIX apresenta sinais de risco');
+        return {
+          status: 'CONFIRMATION_REQUIRED',
+          risk: this.risk.publicAssessment(assessment),
+          confirmationToken: this.risk.confirmationToken(userId, assessment),
+        };
+      }
     }
 
     // ids reais das transações, usados como entityId das notificações

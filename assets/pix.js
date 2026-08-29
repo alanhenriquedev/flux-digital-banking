@@ -75,7 +75,24 @@
     var retryBtn = document.getElementById('pixRetry');
     var reviewError = document.getElementById('pixReviewError');
 
+    var riskModal = document.getElementById('pixRiskModal');
+    var riskCancelBtn = document.getElementById('pixRiskCancel');
+    var riskConfirmBtn = document.getElementById('pixRiskConfirm');
+    var riskBackBtn = document.getElementById('pixRiskBack');
+    var riskLevelEl = document.getElementById('pixRiskLevel');
+    var riskSignals = document.getElementById('pixRiskSignals');
+    var riskConfirmHandler = null;
+    var riskReturnFocus = null;
+
     var pending = null;
+
+    var RISK_SIGNAL_LABEL = {
+      NEW_DEVICE: 'Dispositivo diferente',
+      NEW_RECIPIENT: 'Destinatário não utilizado',
+      HIGH_VALUE: 'Valor elevado',
+      UNUSUAL_HOUR: 'Horário incomum',
+      DIFFERENT_NETWORK: 'Rede/IP diferente'
+    };
 
     function newIdempotencyKey(){
       if(window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
@@ -180,6 +197,55 @@
       }
     }
 
+    function closeRiskModal(){
+      if(!riskModal || riskModal.hidden) return;
+      riskModal.hidden = true;
+      riskModal.setAttribute('aria-hidden','true');
+      riskModal.classList.remove('is-critical');
+      riskConfirmHandler = null;
+      if(riskReturnFocus && riskReturnFocus.focus) riskReturnFocus.focus();
+      riskReturnFocus = null;
+    }
+
+    function openRiskModal(opts){
+      if(!riskModal) return;
+      riskModal.hidden = false;
+      riskModal.classList.toggle('is-critical', !!opts.critical);
+      riskModal.setAttribute('aria-hidden','false');
+      setText('pixRiskAmount', formatBRL(opts.amount));
+      setText('pixRiskLevel', opts.critical ? 'Crítico' : (opts.level === 'HIGH' ? 'Alto' : 'Médio'));
+      setText('pixRiskDesc', opts.desc);
+      setText('pixRiskEyebrow', opts.critical ? 'Pagamento bloqueado' : 'Verificação de segurança');
+      setText('pixRiskTitle', opts.critical ? 'Pagamento bloqueado' : 'Verificação de segurança');
+
+      if(riskSignals){
+        var list = riskSignals.querySelector('.pix-risk-signals-list');
+        var sigs = (opts.signals || []).filter(function(s){ return RISK_SIGNAL_LABEL[s]; });
+        if(list){
+          list.innerHTML = sigs.map(function(s){
+            return '<span class="pix-risk-signal">'+es(RISK_SIGNAL_LABEL[s])+'</span>';
+          }).join('');
+        }
+        riskSignals.hidden = sigs.length === 0;
+      }
+
+      riskConfirmHandler = opts.onConfirm || null;
+      riskReturnFocus = opts.returnFocus || null;
+
+      if(opts.critical){
+        riskConfirmBtn.hidden = true;
+        riskCancelBtn.hidden = true;
+        riskBackBtn.hidden = false;
+        riskBackBtn.focus();
+      } else {
+        riskConfirmBtn.hidden = false;
+        riskCancelBtn.hidden = false;
+        riskBackBtn.hidden = true;
+        riskConfirmBtn.textContent = opts.confirmLabel || 'Continuar';
+        riskConfirmBtn.focus();
+      }
+    }
+
     function sendPix(){
       if(!pending) return;
       if(confirmBtn && confirmBtn.classList.contains('is-loading')) return;
@@ -194,6 +260,26 @@
         body: JSON.stringify(pending),
       })
         .then(function(res){
+          if(res && res.status === 'CONFIRMATION_REQUIRED'){
+            resetConfirm();
+            var level = res.risk && res.risk.level;
+            openRiskModal({
+              level: level,
+              amount: pending.amount,
+              signals: res.risk && res.risk.signals,
+              desc: level === 'HIGH'
+                ? 'Este pagamento apresenta sinais de risco.'
+                : 'Este pagamento apresenta características incomuns.',
+              confirmLabel: level === 'HIGH' ? 'Confirmar pagamento' : 'Continuar',
+              returnFocus: confirmBtn,
+              onConfirm: function(){
+                pending.riskConfirmation = res.confirmationToken;
+                closeRiskModal();
+                sendPix();
+              }
+            });
+            return;
+          }
           resetConfirm();
           var msg = res && res.message ? res.message : 'PIX enviado com sucesso.';
           var to = res && res.to;
@@ -213,6 +299,17 @@
         })
         .catch(function(err){
           resetConfirm();
+          if(err && err.status === 403){
+            openRiskModal({
+              critical: true,
+              amount: pending.amount,
+              signals: [],
+              desc: 'Por segurança, este Pix foi interrompido.',
+              returnFocus: confirmBtn,
+              onConfirm: null
+            });
+            return;
+          }
           showReviewError(err && err.message
             ? err.message
             : 'Não foi possível enviar o PIX. Tente novamente.');
@@ -246,6 +343,34 @@
     }
     if(retryBtn){
       retryBtn.addEventListener('click', sendPix);
+    }
+
+    if(riskConfirmBtn){
+      riskConfirmBtn.addEventListener('click', function(){
+        if(riskConfirmHandler) riskConfirmHandler();
+      });
+    }
+    if(riskCancelBtn){
+      riskCancelBtn.addEventListener('click', closeRiskModal);
+    }
+    if(riskBackBtn){
+      riskBackBtn.addEventListener('click', closeRiskModal);
+    }
+    if(riskModal){
+      riskModal.addEventListener('keydown', function(e){
+        if(e.key === 'Escape'){ e.preventDefault(); closeRiskModal(); return; }
+        if(e.key !== 'Tab') return;
+        var els = riskModal.querySelectorAll('button:not([hidden]):not([disabled])');
+        if(els.length === 0) return;
+        var first = els[0], last = els[els.length - 1];
+        var active = document.activeElement;
+        if(e.shiftKey){ if(active === first){ e.preventDefault(); last.focus(); } }
+        else if(active === last){ e.preventDefault(); first.focus(); }
+      });
+      var backdrop = riskModal.querySelector('[data-pixrisk-close]');
+      if(backdrop){
+        backdrop.addEventListener('click', closeRiskModal);
+      }
     }
   }
 

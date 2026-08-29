@@ -188,6 +188,41 @@
   </main>
 </div>
 
+<!-- MODAL: verificação de segurança (Flux Security) -->
+<div class="pix-modal" id="pixRiskModal" role="dialog" aria-modal="true"
+     aria-labelledby="pixRiskTitle" aria-describedby="pixRiskDesc" aria-hidden="true" hidden>
+  <div class="pix-modal-backdrop" data-pixrisk-close></div>
+  <div class="pix-modal-panel" role="document">
+    <div class="pix-modal-ic" id="pixRiskIcon" aria-hidden="true">
+      <svg viewBox="0 0 24 24"><path d="M12 2 4.5 5.5v5.6c0 4.6 3.2 8.5 7.5 9.9 4.3-1.4 7.5-5.3 7.5-9.9V5.5L12 2z"/><path d="M12 8v4M12 15.5h.01"/></svg>
+    </div>
+    <div class="pix-modal-eyebrow" id="pixRiskEyebrow">Verificação de segurança</div>
+    <h2 class="pix-modal-title" id="pixRiskTitle">Verificação de segurança</h2>
+    <p class="pix-modal-desc" id="pixRiskDesc">Este pagamento apresenta características incomuns.</p>
+
+    <dl class="pix-risk-list">
+      <div class="pix-risk-row">
+        <dt>Valor</dt>
+        <dd id="pixRiskAmount">—</dd>
+      </div>
+      <div class="pix-risk-row">
+        <dt>Risco</dt>
+        <dd id="pixRiskLevel">—</dd>
+      </div>
+      <div class="pix-risk-signals" id="pixRiskSignals" hidden>
+        <dt class="pix-risk-signals-label">Sinais detectados</dt>
+        <dd class="pix-risk-signals-list"></dd>
+      </div>
+    </dl>
+
+    <div class="pix-modal-actions">
+      <button type="button" class="btn btn-ghost btn-lg" id="pixRiskCancel">Cancelar</button>
+      <button type="button" class="btn btn-primary btn-lg" id="pixRiskConfirm">Continuar</button>
+      <button type="button" class="btn btn-primary btn-lg" id="pixRiskBack" hidden>Voltar</button>
+    </div>
+  </div>
+</div>
+
 <script src="assets/config.js"></script>
 <script src="assets/api.js"></script>
 <script src="assets/pix.js"></script>

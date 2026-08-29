@@ -64,12 +64,13 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
    * mas NUNCA propagada — uma notificação quebrada não pode reverter ou
    * interromper a operação financeira que a originou.
    */
-  async safeCreate(data: CreateNotificationData): Promise<void> {
+  async safeCreate(data: CreateNotificationData): Promise<boolean> {
     const reliable = { ...data, dedupKey: data.dedupKey ?? stableDedupKey(data) };
     try {
       await this.createNotification(reliable);
+      return true;
     } catch (err) {
-      if (isUniqueViolation(err)) return;
+      if (isUniqueViolation(err)) return false;
       try {
         await this.prisma.notificationOutbox.create({
           data: {
@@ -83,7 +84,7 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
             dedupKey: reliable.dedupKey!,
           },
         });
-        return;
+        return true;
       } catch (outboxErr) {
         this.logger.error('Falha ao enfileirar notificação para reprocessamento', outboxErr instanceof Error ? outboxErr.stack : String(outboxErr));
       }
@@ -91,6 +92,7 @@ export class NotificationsService implements OnModuleInit, OnModuleDestroy {
         `Falha ao criar notificação (${reliable.type}) para user ${reliable.userId}: ${reliable.title}`,
         err instanceof Error ? err.stack : String(err),
       );
+      return false;
     }
   }
 

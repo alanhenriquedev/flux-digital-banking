@@ -1,4 +1,5 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Post, Req, UseGuards } from '@nestjs/common';
+import { Request } from 'express';
 import { ApiBearerAuth, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -20,7 +21,7 @@ export class PixController {
   @ApiResponse({ status: 404, description: 'Conta de origem/destino não encontrada' })
   @ApiResponse({ status: 409, description: 'Envio para a própria conta' })
   @ApiResponse({ status: 422, description: 'Saldo insuficiente ou conta bloqueada' })
-  send(@CurrentUser() user: { userId: string }, @Body() dto: SendPixDto) {
-    return this.transactionsService.sendPix(user.userId, dto);
+  send(@CurrentUser() user: { userId: string; sid?: string | null }, @Body() dto: SendPixDto, @Req() req: Request) {
+    return this.transactionsService.sendPix(user.userId, dto, { sessionId: user.sid ?? null, ip: req.ip ?? null });
   }
 }

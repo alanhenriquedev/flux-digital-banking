@@ -41,6 +41,9 @@ function makeService({ settingsRows = [], created = [] } = {}) {
       created.push(data);
       return { id: 'n' + (created.length) };
     },
+    safeCreate: async (data) => {
+      try { await notifications.createNotification(data); return true; } catch { return false; }
+    },
   };
   const svc = new AlertsService(prisma, notifications);
   return { svc, prisma, created };
@@ -123,9 +126,25 @@ test('dispatch idempotente: P2002 é engolido (já notificado)', async () => {
   let attempts = 0;
   const svc = new AlertsService(prisma, {
     createNotification: async () => { attempts++; throw p2002(); },
+    safeCreate: async () => { attempts++; return false; },
   });
   await svc.onPixSent({ userId: 'u1', txId: 'dup', amount: 5000, counterpartyName: 'B', counterpartyNumber: '1', balanceAfter: null });
   assert.strictEqual(attempts, 1, 'tentou criar exatamente uma vez');
+});
+
+test('dispatch usa a outbox quando a notificação do alerta falha', async () => {
+  const queued = [];
+  const prisma = {
+    alertSetting: { findUnique: async () => null },
+    notificationOutbox: { create: async ({ data }) => { queued.push(data); return data; } },
+  };
+  const svc = new AlertsService(prisma, {
+    createNotification: async () => { throw new Error('transient'); },
+    safeCreate: async (data) => { queued.push(data); return true; },
+  });
+  await svc.onPixSent({ userId: 'u1', txId: 'tx-outbox', amount: 5000, counterpartyName: 'B', counterpartyNumber: '1', balanceAfter: null });
+  assert.strictEqual(queued.length, 1);
+  assert.strictEqual(queued[0].dedupKey, 'pixabove:tx-outbox');
 });
 
 // ---------- onLogin ----------
@@ -146,7 +165,7 @@ test('onLogin: primeiro dispositivo da conta -> sem alerta de novo dispositivo',
     authSession: { findMany: async () => [] },
   };
   const created = [];
-  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; }, safeCreate: async (d) => { created.push(d); return true; } });
   await svc.onLogin(loginCtx('hash-a', '189.28.12.7'));
   assert.strictEqual(created.length, 0);
 });
@@ -158,7 +177,7 @@ test('onLogin: hash novo após já ter dispositivos -> NEW_DEVICE_LOGIN', async 
     authSession: { findMany: async () => previous },
   };
   const created = [];
-  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; }, safeCreate: async (d) => { created.push(d); return true; } });
   await svc.onLogin(loginCtx('hash-b', '189.28.99.99'));
   assert.strictEqual(created.length, 1);
   assert.strictEqual(created[0].type, 'ALERT_SECURITY');
@@ -172,7 +191,7 @@ test('onLogin: mesmo dispositivo, rede diferente -> SUSPICIOUS_LOGIN', async () 
     authSession: { findMany: async () => previous },
   };
   const created = [];
-  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; }, safeCreate: async (d) => { created.push(d); return true; } });
   await svc.onLogin(loginCtx('hash-a', '177.40.9.9'));
   assert.strictEqual(created.length, 1);
   assert.ok(created[0].title.toLowerCase().includes('rede'));
@@ -185,7 +204,7 @@ test('onLogin: mesmo dispositivo e mesma rede -> nada', async () => {
     authSession: { findMany: async () => previous },
   };
   const created = [];
-  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; }, safeCreate: async (d) => { created.push(d); return true; } });
   await svc.onLogin(loginCtx('hash-a', '189.28.99.1'));
   assert.strictEqual(created.length, 0);
 });
@@ -203,7 +222,7 @@ test('onBalanceChanged alerta somente na transição abaixo/acima do limite', as
     },
     $transaction: async (fn) => fn({ alertState: prisma.alertState }),
   };
-  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; } });
+  const svc = new AlertsService(prisma, { createNotification: async (d) => { created.push(d); return { id: 'n' }; }, safeCreate: async (d) => { created.push(d); return true; } });
 
   await svc.onBalanceChanged({ userId: 'u1', before: 150, after: 80, entityId: 'a' });
   await svc.onBalanceChanged({ userId: 'u1', before: 80, after: 70, entityId: 'b' });

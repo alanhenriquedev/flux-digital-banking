@@ -12,6 +12,12 @@ import {
 } from 'class-validator';
 
 export class SendPixDto {
+  @ApiPropertyOptional({ description: 'Token de confirmação de risco emitido pelo backend' })
+  @IsOptional()
+  @IsString()
+  @MaxLength(2048)
+  riskConfirmation?: string;
+
   @ApiPropertyOptional({ description: 'Chave de idempotência do envio' })
   @IsOptional()
   @IsUUID()

@@ -188,7 +188,7 @@ export class AlertsService {
             : 'ALERT_ACCOUNT';
 
       try {
-        await this.notifications.createNotification({
+        return await this.notifications.safeCreate({
           userId: opts.userId,
           type,
           title: opts.title,
@@ -198,11 +198,7 @@ export class AlertsService {
           entityId: opts.entityId ?? null,
           dedupKey: opts.dedupKey,
         });
-        return true;
       } catch (err) {
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-          return false; // já notificado para este evento (idempotente)
-        }
         throw err;
       }
     } catch (err) {
