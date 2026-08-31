@@ -69,6 +69,22 @@ export class UsersService {
     });
   }
 
+  consumeEmailVerificationToken(tokenHash: string, now: Date) {
+    return this.prisma.user.updateMany({
+      where: {
+        emailVerifyToken: tokenHash,
+        emailVerifyTokenExpiry: { gt: now },
+        emailVerified: false,
+      },
+      data: {
+        emailVerified: true,
+        emailVerifiedAt: now,
+        emailVerifyToken: null,
+        emailVerifyTokenExpiry: null,
+      },
+    });
+  }
+
   setPendingEmail(userId: string, pendingEmail: string, tokenHash: string, expiresAt: Date) {
     return this.prisma.user.update({
       where: { id: userId },
@@ -123,6 +139,39 @@ export class UsersService {
         passwordHash,
         passwordResetToken: null,
         passwordResetTokenExpiry: null,
+      },
+    });
+  }
+
+  consumePasswordResetToken(tokenHash: string, passwordHash: string, now: Date) {
+    return this.prisma.user.updateMany({
+      where: {
+        passwordResetToken: tokenHash,
+        passwordResetTokenExpiry: { gt: now },
+      },
+      data: {
+        passwordHash,
+        passwordResetToken: null,
+        passwordResetTokenExpiry: null,
+      },
+    });
+  }
+
+  consumePendingEmailToken(userId: string, newEmail: string, tokenHash: string, now: Date) {
+    return this.prisma.user.updateMany({
+      where: {
+        id: userId,
+        pendingEmail: newEmail,
+        pendingEmailToken: tokenHash,
+        pendingEmailTokenExpiry: { gt: now },
+      },
+      data: {
+        email: newEmail,
+        emailVerified: true,
+        emailVerifiedAt: now,
+        pendingEmail: null,
+        pendingEmailToken: null,
+        pendingEmailTokenExpiry: null,
       },
     });
   }

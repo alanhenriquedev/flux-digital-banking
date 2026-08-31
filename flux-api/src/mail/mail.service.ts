@@ -1,10 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
 import type { Transporter } from 'nodemailer';
 
 @Injectable()
-export class MailService {
+export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
   private readonly transporter: Transporter;
 
@@ -23,26 +23,24 @@ export class MailService {
     });
   }
 
+  async onModuleInit(): Promise<void> {
+    try {
+      await this.transporter.verify();
+      this.logger.log('SMTP disponível.');
+    } catch (err) {
+      this.logger.warn(`SMTP indisponível; o envio falhará até a configuração ser corrigida: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   async sendVerificationEmail(to: string, name: string, token: string): Promise<void> {
     const frontendUrl = (this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:5500').replace(/\/+$/, '');
     const link = `${frontendUrl}/verificar_email.html?token=${encodeURIComponent(token)}`;
 
-    try {
-      await this.transporter.sendMail({
-        from: this.config.get<string>('MAIL_FROM') ?? 'Flux <noreply@flux.local>',
-        to,
-        subject: 'Confirme seu e-mail no Flux',
-        html: this.buildVerificationTemplate(name, link),
-      });
-    } catch (err) {
-      this.logger.error(
-        `Falha ao enviar e-mail de confirmação para ${to}`,
-        err instanceof Error ? err.stack : String(err),
-      );
-    }
+    await this.deliver(to, 'Confirme seu e-mail no Flux', this.buildVerificationTemplate(name, link));
   }
 
   private buildVerificationTemplate(name: string, link: string): string {
+    const safeName = escapeHtml(name);
     return `
 <div style="background:#090b0f; margin:0; padding:0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#090b0f;">
@@ -65,7 +63,7 @@ export class MailService {
                 Confirme seu e-mail
               </h1>
               <p style="margin:0 0 20px; font-family:Arial,sans-serif; font-size:15px; line-height:1.65; color:#9aa4b4;">
-                Olá, <strong style="color:#f2f5f9;">${name}</strong>. Sua conta Flux foi criada com sucesso.
+                 Olá, <strong style="color:#f2f5f9;">${safeName}</strong>. Sua conta Flux foi criada com sucesso.
                 Para liberar o acesso, confirme agora o seu endereço de e-mail.
               </p>
               <div style="text-align:center; margin:28px 0;">
@@ -95,23 +93,11 @@ export class MailService {
     const frontendUrl = (this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:5500').replace(/\/+$/, '');
     const link = `${frontendUrl}/redefinir_senha.html?token=${encodeURIComponent(token)}`;
 
-    try {
-      await this.transporter.sendMail({
-        from: this.config.get<string>('MAIL_FROM') ?? 'Flux <noreply@flux.local>',
-        to,
-        subject: 'Redefina sua senha no Flux',
-        html: this.buildPasswordResetTemplate(name, link),
-      });
-    } catch (err) {
-      this.logger.error(
-        `Falha ao enviar e-mail de redefinição de senha para ${to}`,
-        err instanceof Error ? err.stack : String(err),
-      );
-      throw err;
-    }
+    await this.deliver(to, 'Redefina sua senha no Flux', this.buildPasswordResetTemplate(name, link));
   }
 
   private buildPasswordResetTemplate(name: string, link: string): string {
+    const safeName = escapeHtml(name);
     return `
 <div style="background:#090b0f; margin:0; padding:0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#090b0f;">
@@ -134,7 +120,7 @@ export class MailService {
                 Redefina sua senha
               </h1>
               <p style="margin:0 0 20px; font-family:Arial,sans-serif; font-size:15px; line-height:1.65; color:#9aa4b4;">
-                Olá, <strong style="color:#f2f5f9;">${name}</strong>. Recebemos uma solicitação para redefinir
+                 Olá, <strong style="color:#f2f5f9;">${safeName}</strong>. Recebemos uma solicitação para redefinir
                 a senha da sua conta Flux. Para continuar, clique no botão abaixo.
               </p>
               <div style="text-align:center; margin:28px 0;">
@@ -164,22 +150,25 @@ export class MailService {
     const frontendUrl = (this.config.get<string>('FRONTEND_URL') ?? 'http://localhost:5500').replace(/\/+$/, '');
     const link = `${frontendUrl}/confirmar_email.html?token=${encodeURIComponent(token)}`;
 
+    await this.deliver(to, 'Confirme seu novo e-mail no Flux', this.buildEmailChangeTemplate(name, link));
+  }
+
+  private async deliver(to: string, subject: string, html: string): Promise<void> {
     try {
       await this.transporter.sendMail({
         from: this.config.get<string>('MAIL_FROM') ?? 'Flux <noreply@flux.local>',
         to,
-        subject: 'Confirme seu novo e-mail no Flux',
-        html: this.buildEmailChangeTemplate(name, link),
+        subject,
+        html,
       });
     } catch (err) {
-      this.logger.error(
-        `Falha ao enviar e-mail de confirmação de troca para ${to}`,
-        err instanceof Error ? err.stack : String(err),
-      );
+      this.logger.error(`Falha ao enviar e-mail para ${to}`, err instanceof Error ? err.stack : String(err));
+      throw new Error('mail-delivery-failed');
     }
   }
 
   private buildEmailChangeTemplate(name: string, link: string): string {
+    const safeName = escapeHtml(name);
     return `
 <div style="background:#090b0f; margin:0; padding:0;">
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#090b0f;">
@@ -202,7 +191,7 @@ export class MailService {
                 Confirme seu novo e-mail
               </h1>
               <p style="margin:0 0 20px; font-family:Arial,sans-serif; font-size:15px; line-height:1.65; color:#9aa4b4;">
-                Olá, <strong style="color:#f2f5f9;">${name}</strong>. Recebemos uma solicitação para alterar
+                 Olá, <strong style="color:#f2f5f9;">${safeName}</strong>. Recebemos uma solicitação para alterar
                 o e-mail da sua conta Flux para este endereço. Para concluir a troca, clique no botão abaixo.
               </p>
               <div style="text-align:center; margin:28px 0;">
@@ -228,4 +217,13 @@ export class MailService {
 </div>
 `;
   }
+}
+
+function escapeHtml(value: string): string {
+  return value
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }

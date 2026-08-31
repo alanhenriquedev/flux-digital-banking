@@ -6,6 +6,7 @@ import {
   HttpStatus,
   Injectable,
   Logger,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -114,8 +115,12 @@ export class AuthService {
 
     const { token, hash } = this.generateVerificationToken();
     const expiresAt = new Date(Date.now() + this.verificationTtlMs());
+    try {
+      await this.mailService.sendVerificationEmail(user.email, user.fullName, token);
+    } catch {
+      throw new ServiceUnavailableException('Não foi possível enviar o e-mail de confirmação. Tente novamente.');
+    }
     await this.usersService.setEmailVerifyToken(user.id, hash, expiresAt);
-    await this.mailService.sendVerificationEmail(user.email, user.fullName, token);
 
     return {
       message: 'Conta criada com sucesso. Enviamos um e-mail de confirmação para você.',
@@ -224,7 +229,13 @@ export class AuthService {
       throw new BadRequestException('Link de confirmação expirado. Solicite um novo e-mail.');
     }
 
-    await this.usersService.markAsVerified(user.id);
+    const consumed = await this.usersService.consumeEmailVerificationToken(
+      hashToken(dto.token),
+      new Date(),
+    );
+    if (consumed.count !== 1) {
+      throw new BadRequestException('Link de confirmação inválido ou já utilizado.');
+    }
 
     return { message: 'E-mail confirmado com sucesso.' };
   }
@@ -257,14 +268,17 @@ export class AuthService {
 
     const { token, hash } = this.generateVerificationToken();
     const expiresAt = new Date(Date.now() + this.verificationTtlMs());
+    try {
+      await this.mailService.sendVerificationEmail(user.email, user.fullName, token);
+    } catch {
+      throw new ServiceUnavailableException('Não foi possível enviar o e-mail de confirmação. Tente novamente.');
+    }
     await this.usersService.setEmailVerifyToken(user.id, hash, expiresAt);
 
     this.lastResendAt.set(user.id, Date.now());
     if (this.lastResendAt.size > 1000) {
       this.pruneResendCooldowns();
     }
-
-    await this.mailService.sendVerificationEmail(user.email, user.fullName, token);
 
     return { message: 'E-mail de confirmação enviado. Verifique sua caixa de entrada.' };
   }
@@ -291,8 +305,12 @@ export class AuthService {
     if (user) {
       const { token, hash } = this.generatePasswordResetToken();
       const expiresAt = new Date(Date.now() + this.passwordResetTtlMs());
+      try {
+        await this.mailService.sendPasswordResetEmail(user.email, user.fullName, token);
+      } catch {
+        throw new ServiceUnavailableException('Não foi possível enviar as instruções de recuperação. Tente novamente.');
+      }
       await this.usersService.setPasswordResetToken(user.id, hash, expiresAt);
-      await this.mailService.sendPasswordResetEmail(user.email, user.fullName, token);
     }
 
     return {
@@ -313,7 +331,14 @@ export class AuthService {
     }
 
     const passwordHash = await bcrypt.hash(dto.password, 12);
-    await this.usersService.resetUserPassword(user.id, passwordHash);
+    const consumed = await this.usersService.consumePasswordResetToken(
+      hashToken(dto.token),
+      passwordHash,
+      new Date(),
+    );
+    if (consumed.count !== 1) {
+      throw new BadRequestException('Link de redefinição inválido ou já utilizado.');
+    }
 
     try {
       await this.security.revokeAll(user.id, 'PASSWORD_CHANGED');
@@ -417,9 +442,12 @@ export class AuthService {
     // Substitui qualquer pendência anterior (novo token, nova validade).
     const { token, hash } = this.generateVerificationToken();
     const expiresAt = new Date(Date.now() + this.verificationTtlMs());
+    try {
+      await this.mailService.sendEmailChangeConfirmationEmail(newEmail, user.fullName, token);
+    } catch {
+      throw new ServiceUnavailableException('Não foi possível enviar a confirmação para o novo e-mail. Tente novamente.');
+    }
     await this.usersService.setPendingEmail(user.id, newEmail, hash, expiresAt);
-
-    await this.mailService.sendEmailChangeConfirmationEmail(newEmail, user.fullName, token);
 
     return { message: 'Confirmação enviada para o novo e-mail.' };
   }
@@ -443,7 +471,15 @@ export class AuthService {
 
     try {
       // Swap atômico: troca o e-mail, confirma e limpa a pendência num único update.
-      await this.usersService.confirmPendingEmailSwap(user.id, user.pendingEmail);
+      const consumed = await this.usersService.consumePendingEmailToken(
+        user.id,
+        user.pendingEmail,
+        hashToken(dto.token),
+        new Date(),
+      );
+      if (consumed.count !== 1) {
+        throw new BadRequestException('Link de confirmação inválido ou já utilizado.');
+      }
     } catch (err) {
       if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
         throw new ConflictException('Este e-mail já está cadastrado.');

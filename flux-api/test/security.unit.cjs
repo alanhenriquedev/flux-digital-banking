@@ -353,6 +353,7 @@ test('resetPassword revoga todas as sessões com PASSWORD_CHANGED', async () => 
     {
       findByPasswordResetToken: async () => ({ id: 'u1', passwordHash, passwordResetTokenExpiry: new Date(Date.now() + 3_600_000) }),
       resetUserPassword: async () => {},
+      consumePasswordResetToken: async () => ({ count: 1 }),
     },
     {},
     {},
