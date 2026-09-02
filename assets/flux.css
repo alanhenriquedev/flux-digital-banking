@@ -96,7 +96,7 @@
      opacity:0;transform:scale(.82);
      transition:border-radius .35s ease, box-shadow .35s ease;
   }
-   .boot.play .boot-mark{animation:bootMarkIn .52s cubic-bezier(.16,.8,.3,1) both;}
+   .boot.play .boot-mark{animation:bootMarkIn .58s cubic-bezier(.16,.8,.3,1) both;}
   .boot-mark.is-final{border-radius:8px;box-shadow:inset 0 1px 1px rgba(255,255,255,0.35), inset 0 -8px 14px rgba(0,0,0,0.28);}
   .boot-mark::after{
     content:'';position:absolute;top:-12%;bottom:-12%;left:-45%;width:36%;
@@ -113,7 +113,7 @@
     font-size:61px;font-weight:700;letter-spacing:1.4px;color:#f2f5f9;
      opacity:0;transform:translateY(7px);
   }
-   .boot.play .boot-flux{animation:bootFluxIn .42s cubic-bezier(.16,.8,.3,1) .18s both;}
+   .boot.play .boot-flux{animation:bootFluxIn .48s cubic-bezier(.16,.8,.3,1) .2s both;}
   @keyframes bootFluxIn{
      from{opacity:0;transform:translateY(7px);letter-spacing:3px;}
     to{opacity:1;transform:translateY(0);letter-spacing:1.4px;}
@@ -149,7 +149,7 @@
   }
   header.is-scrolled::after{opacity:1;}
   /* âncoras não ficam ocultas sob o header fixo */
-  #funcionalidades,#app,#seguranca,#why{scroll-margin-top:88px;}
+  #funcionalidades,#app,#seguranca,#sobre{scroll-margin-top:88px;}
   nav{
     display:flex;align-items:center;justify-content:space-between;
     padding:clamp(14px,2vw,18px) clamp(20px,3.5vw,32px);max-width:1180px;margin:0 auto;
@@ -236,7 +236,7 @@
      and shrink properly on narrow screens instead of overflowing */
   .feat-grid > *, .card-grid > *, .perk-list > *, .loan-grid > *,
   .stat-trio > *, .fin-grid > *, .fin-stats > *, .sec-grid > *,
-  .why-grid > *, .foot-grid > *{ min-width:0; }
+   .foot-grid > *{ min-width:0; }
   .hero h1{
     font-size:clamp(34px,5.6vw,66px);line-height:1.05;font-weight:700;letter-spacing:-1.5px;
     margin-bottom:clamp(16px,2.2vw,22px);
@@ -651,16 +651,11 @@
   .sec-card h4{font-size:15px;font-weight:600;margin-bottom:6px;}
   .sec-card p{font-size:13px;color:var(--text-dim);line-height:1.5;}
 
-  /* WHY */
-  .why{padding:clamp(48px,8.5vw,110px) 0;}
-  .why-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:clamp(36px,4.5vw,56px);}
-  @media(max-width:900px){.why-grid{grid-template-columns:repeat(2,1fr);}}
-  @media(max-width:560px){.why-grid{grid-template-columns:1fr;}.why-card{max-width:460px;margin-inline:auto;}}
-  .why-card{text-align:center;padding:40px 28px;border-radius:20px;border:1px solid var(--border-soft);}
-  .why-card .wi{width:52px;height:52px;border-radius:14px;background:var(--accent-grad);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
-  .why-card .wi svg{width:24px;height:24px;stroke:#04121a;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
-  .why-card h3{font-size:18px;font-weight:600;margin-bottom:10px;}
-  .why-card p{font-size:14px;color:var(--text-dim);line-height:1.6;}
+  /* SOBRE */
+  .why.about{padding:clamp(48px,8.5vw,110px) 0;}
+  .why.about .sec-head{max-width:760px;}
+  .why.about .sec-head h2{font-size:clamp(28px,3.6vw,42px);}
+  .why.about .sec-head p{max-width:620px;margin-inline:auto;}
 
   /* CTA */
   .cta{
@@ -691,9 +686,9 @@
   .card-section::before,
   .app-section::before,
   .finance::before,
-  .security::before,
-  .why::before,
-  .cta::after,
+   .security::before,
+   .about::before,
+   .cta::after,
   footer::before{
     content:'';position:absolute;top:0;left:0;right:0;height:1px;pointer-events:none;z-index:1;
     background:linear-gradient(90deg,
@@ -750,9 +745,19 @@
     }
   }
   @media(max-width:640px){.cta-mark span{font-size:clamp(110px,34vw,340px);}}
-  @media(prefers-reduced-motion:reduce){
+   @media(prefers-reduced-motion:reduce){
     .cta-mark span{color:rgba(255,255,255,0.05);background:none;-webkit-text-fill-color:currentColor;}
-  }
+   }
+
+   /* mobile header: reduce heavy blur/shadow that caused repaint on scroll
+      and keep the fixed bar stable on small screens */
+   @media(max-width:640px){
+     header::before{
+       -webkit-backdrop-filter:none;backdrop-filter:none;
+       background:rgba(9,11,15,0.94);border-bottom:1px solid var(--border-soft);
+     }
+     header::after{box-shadow:none;transition:none;opacity:0;}
+   }
 
   /* FOOTER */
   footer{padding:clamp(40px,5.5vw,70px) 0 36px;position:relative;}
@@ -815,7 +820,6 @@
   /* hover dos cards: elevação via translate (não transform), hairline e sombra sutil */
   .feat-card:hover,
   .sec-card:hover,
-  .why-card:hover,
   .fin-card:hover,
   .loan-sim:hover{
     border-color:rgba(34,200,245,0.45);
@@ -825,7 +829,7 @@
 
   /* refinamento Etapa C: profundidade (scale sutil), resposta sem delay do stagger */
   @media(pointer:fine){
-    .feat-card:hover,.sec-card:hover,.why-card:hover,.fin-card:hover,.loan-sim:hover{
+    .feat-card:hover,.sec-card:hover,.fin-card:hover,.loan-sim:hover{
       transition-delay:0s;
       transition-duration:.3s,.3s,.3s,.3s,.3s,.3s,.25s;
       translate:0 -6px;
@@ -849,7 +853,7 @@
   /* reduced-motion: revela imediatamente, sem blur/transform */
   @media(prefers-reduced-motion:reduce){
     [data-reveal]{opacity:1 !important;transform:none !important;filter:none !important;transition:none !important;}
-    .feat-card:hover,.sec-card:hover,.why-card:hover,.fin-card:hover,.loan-sim:hover{translate:none;box-shadow:none;}
+    .feat-card:hover,.sec-card:hover,.fin-card:hover,.loan-sim:hover{translate:none;box-shadow:none;}
     .phones{animation:none !important;translate:none !important;rotate:none !important;}
     .card-3d{transform:none !important;transition:none !important;}
     /* h1 do hero não pode ficar oculto (o lineUp removido deixaria translateY(112%)) */

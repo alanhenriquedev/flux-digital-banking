@@ -34,13 +34,13 @@ if(boot){
           bootLogo.style.transform = 'translate(' + dx + 'px,' + dy + 'px) scale(' + scale + ')';
         }
         boot.classList.add('is-exit');
-       }, 780);
+       }, 860);
       // 3) cleanup
       setTimeout(()=>{
         boot.remove();
         document.body.style.overflow = prevOverflow;
         document.body.classList.add('booted');
-       }, 1320);
+       }, 1450);
     });
   }
 }
