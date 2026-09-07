@@ -365,6 +365,18 @@ export class LoansService {
           throw new UnprocessableEntityException('Sua conta está bloqueada.');
         }
 
+        const nextOpen = await tx.loanInstallment.findFirst({
+          where: {
+            loanId,
+            status: { in: [LoanInstallmentStatus.PENDING, LoanInstallmentStatus.OVERDUE] },
+          },
+          orderBy: { number: 'asc' },
+          select: { id: true, number: true },
+        });
+        if (!nextOpen || nextOpen.id !== installment.id) {
+          throw new ConflictException('Pague a próxima parcela em aberto antes de continuar.');
+        }
+
         // 1) Debit-guard: só debita se saldo cobre e conta ativa.
         const debit = await tx.account.updateMany({
           where: {

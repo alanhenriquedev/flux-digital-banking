@@ -378,13 +378,12 @@ test('logout revoga a sessão atual via revokeCurrent', async () => {
   assert.deepStrictEqual(revokeArgs, { sid: 's1', userId: 'u1' });
 });
 
-test('JwtStrategy: token legado sem sid continua válido', async () => {
+test('JwtStrategy: token sem sid é rejeitado', async () => {
   const strategy = new JwtStrategy(
     { get: () => 'secret' },
     { findSession: async () => null, touchSession: async () => {} },
   );
-  const out = await strategy.validate({ sub: 'u1' });
-  assert.deepStrictEqual(out, { userId: 'u1', sid: null });
+  await assert.rejects(strategy.validate({ sub: 'u1' }), { name: 'UnauthorizedException' });
 });
 
 test('JwtStrategy: sessão válida retorna userId e sid', async () => {

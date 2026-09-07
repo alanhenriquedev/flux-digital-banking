@@ -277,6 +277,12 @@
   #dashV2 .dbv-header{padding:14px 20px;gap:14px;}
   #dashV2 .dbv-user-name{display:none;}
   #dashV2 .dbv-header-right{gap:12px;}
+  #dashV2 .dbv-header::before{background:rgba(9,11,15,0.94);-webkit-backdrop-filter:none;backdrop-filter:none;}
+  #dashV2 .dbv-header::after{opacity:0;box-shadow:none;transition:none;}
+  #dashV2 .dbv-shortcuts{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+  #dashV2 .dbv-shortcut{min-height:104px;padding:18px 10px;gap:10px;}
+  #dashV2 .dbv-short-ic{width:42px;height:42px;}
+  #dashV2 .dbv-short-name{font-size:13px;}
 }
 
 /* ============================================
@@ -861,6 +867,7 @@
 }
 #dashV2 .dbv-loan-inst-pay:hover{background:rgba(34,200,245,0.2);border-color:rgba(34,200,245,0.7);}
 #dashV2 .dbv-loan-inst-pay:focus-visible{outline:2px solid var(--accent);outline-offset:2px;}
+#dashV2 .dbv-inst-locked{width:100%;font-size:11px;color:var(--text-faint-strong);line-height:1.45;}
 /* "Paga em: …" só aparece empilhado no mobile */
 #dashV2 .dbv-inst-paid-at{display:none;}
 @media (max-width:480px){
@@ -880,7 +887,8 @@
   #dashV2 .dbv-loan-inst-due{grid-area:due;}
   #dashV2 .dbv-loan-inst-amt{grid-area:amt;}
   #dashV2 .dbv-inst-paid-at{grid-area:paid;display:block;color:#4ade80;font-weight:600;}
-  #dashV2 .dbv-loan-inst-pay{grid-area:pay;width:100%;margin-left:0;text-align:center;}
+   #dashV2 .dbv-loan-inst-pay{grid-area:pay;width:100%;margin-left:0;text-align:center;}
+   #dashV2 .dbv-inst-locked{grid-area:pay;}
   #dashV2 .dbv-loan-inst-due::before{content:'Vencimento: ';color:var(--text-faint-strong);}
   #dashV2 .dbv-loan-inst-amt::before{content:'Valor: ';color:var(--text-faint-strong);font-weight:500;}
   /* OVERDUE: destaque claro por texto + estilo */
@@ -963,6 +971,7 @@
 }
 #dashV2 .dbv-modal-cancel:hover{color:var(--text);border-color:var(--text-faint);}
 #dashV2 .dbv-modal-cancel:disabled{opacity:.5;cursor:not-allowed;}
+#dashV2 #dbvLoanModal .dbv-modal-cancel{display:inline-flex;align-items:center;justify-content:center;line-height:1;box-sizing:border-box;}
 /* comunica "Cancelar" perfeitamente centralizado no modal de pagamento de parcela */
 #dashV2 #dbvPayModal .dbv-modal-cancel{
   display:inline-flex;align-items:center;justify-content:center;
@@ -1024,10 +1033,10 @@
 #dashV2 .dbv-section#movimentacoes .stmt-item:hover .stmt-amount{letter-spacing:-.1px;}
 
 #dashV2 .dbv-section#movimentacoes .stmt-ic{width:40px;height:40px;border-radius:13px;box-shadow:inset 0 1px 0 rgba(255,255,255,0.05);transition:transform .25s var(--dv-ease);}
-#dashV2 .dbv-section#movimentacoes .stmt-ic-in{background:linear-gradient(150deg,rgba(61,220,132,0.16),rgba(61,220,132,0.04));border:1px solid rgba(61,220,132,0.26);}
-#dashV2 .dbv-section#movimentacoes .stmt-ic-in svg{stroke:var(--up);}
-#dashV2 .dbv-section#movimentacoes .stmt-ic-out{background:linear-gradient(150deg,rgba(34,200,245,0.15),rgba(10,132,255,0.05));border:1px solid rgba(34,200,245,0.26);}
-#dashV2 .dbv-section#movimentacoes .stmt-ic-out svg{stroke:var(--accent);}
+#dashV2 .dbv-section#movimentacoes .stmt-ic-in{background:linear-gradient(150deg,rgba(34,200,245,0.16),rgba(10,132,255,0.05));border:1px solid rgba(34,200,245,0.30);}
+#dashV2 .dbv-section#movimentacoes .stmt-ic-in svg{stroke:var(--accent);}
+#dashV2 .dbv-section#movimentacoes .stmt-ic-out{background:linear-gradient(150deg,rgba(255,92,122,0.16),rgba(255,92,122,0.05));border:1px solid rgba(255,92,122,0.30);}
+#dashV2 .dbv-section#movimentacoes .stmt-ic-out svg{stroke:var(--down);}
 
 #dashV2 .dbv-section#movimentacoes .stmt-title{font-size:14px;font-weight:600;color:var(--text);}
 #dashV2 .dbv-section#movimentacoes .stmt-tag{
@@ -1292,7 +1301,7 @@
   font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;
   background:var(--accent-grad);-webkit-background-clip:text;background-clip:text;color:transparent;
 }
-#dashV2 .dbv-bell-sub{font-size:12px;color:var(--text-faint-strong);margin-top:6px;line-height:1.5;}
+#dashV2 .dbv-bell-sub{display:block;font-size:12px;color:var(--text-faint-strong);margin-top:7px;line-height:1.55;}
 #dashV2 .dbv-bell-meta{display:flex;align-items:center;gap:10px;margin-top:6px;font-size:11px;color:var(--text-faint-strong);}
 
 /* ponto de não lida */

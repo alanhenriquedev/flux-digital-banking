@@ -19,7 +19,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') ?? 'dev-secret',
+      secretOrKey: requireJwtSecret(configService),
     });
   }
 
@@ -29,10 +29,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     }
 
     if (!payload.sid) {
-      return {
-        userId: payload.sub,
-        sid: null,
-      };
+      throw new UnauthorizedException('Sessão inválida ou expirada.');
     }
 
     const session = await this.security.findSession(payload.sid);
@@ -54,4 +51,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     if (session.revokedAt !== null) return false;
     return session.expiresAt.getTime() > Date.now();
   }
+}
+
+function requireJwtSecret(config: ConfigService): string {
+  const secret = config.get<string>('JWT_SECRET');
+  if (!secret || secret.trim().length === 0) {
+    throw new Error('JWT_SECRET must be configured.');
+  }
+  return secret;
 }

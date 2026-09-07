@@ -271,8 +271,24 @@ test('empréstimo contratado -> LOAN_CONTRACTED (respeita preferência)', async 
   assert.strictEqual(due1.length, 1, 'lembrete criado uma vez');
 
   await api('GET', '/loans', { token: tokenA });
-  const due2 = await prisma.notification.findMany({
-    where: { userId: u.id, dedupKey: `due:${firstPending.id}` },
-  });
-  assert.strictEqual(due2.length, 1, 'sem duplicidade no segundo acesso (dedup)');
-});
+   const due2 = await prisma.notification.findMany({
+     where: { userId: u.id, dedupKey: `due:${firstPending.id}` },
+   });
+   assert.strictEqual(due2.length, 1, 'sem duplicidade no segundo acesso (dedup)');
+
+   const secondPending = await prisma.loanInstallment.findFirst({
+     where: { loanId, status: 'PENDING', number: 2 },
+   });
+   const account = await prisma.account.findUnique({ where: { userId: u.id } });
+   const balanceBefore = account.balance.toString();
+   const txBefore = await prisma.transaction.count({ where: { accountId: account.id } });
+   const futurePay = await api('POST', `/loans/${loanId}/installments/${secondPending.id}/pay`, { token: tokenA });
+   assert.strictEqual(futurePay.status, 409, 'parcela futura deve ser bloqueada');
+   assert.strictEqual((await prisma.account.findUnique({ where: { id: account.id } })).balance.toString(), balanceBefore);
+   assert.strictEqual(await prisma.transaction.count({ where: { accountId: account.id } }), txBefore);
+
+   const firstPay = await api('POST', `/loans/${loanId}/installments/${firstPending.id}/pay`, { token: tokenA });
+   assert.strictEqual(firstPay.status, 201, JSON.stringify(firstPay));
+   const crossUserPay = await api('POST', `/loans/${loanId}/installments/${secondPending.id}/pay`, { token: tokenB });
+   assert.strictEqual(crossUserPay.status, 404, 'outro usuário não pode pagar parcela alheia');
+ });

@@ -371,9 +371,12 @@
             tip = ' title="Paga ' + paidAt + (it.paidAmount == null ? '' : ' · ' + formatBRL(it.paidAmount)) + '"';
           }
         }
-        var btn = payable
-          ? '<button type="button" class="dbv-loan-inst-pay" data-inst-id="' + it.id + '" data-inst-no="' + it.number + '">Pagar parcela</button>'
-          : '';
+         var btn = payable && highlight
+           ? '<button type="button" class="dbv-loan-inst-pay" data-inst-id="' + it.id + '" data-inst-no="' + it.number + '">Pagar parcela</button>'
+           : '';
+         var locked = payable && !highlight
+           ? '<span class="dbv-inst-locked">Pague a parcela anterior para liberar esta.</span>'
+           : '';
         var paidAtHtml = '';
         if(it.status === 'PAID'){
           var paidTxt = fmtDateBR(it.paidAt);
@@ -385,7 +388,7 @@
           '<strong class="dbv-loan-inst-amt">' + formatBRL(it.amount) + '</strong>' +
           '<span class="dbv-inst-badge ' + st.cls + '"' + tip + '>' + st.label + '</span>' +
           paidAtHtml +
-          btn +
+           btn + locked +
         '</li>';
       }).join('');
       box.hidden = false;
@@ -1290,8 +1293,8 @@
       '<li class="stmt-item">' +
         '<div class="stmt-ic ' + (incoming ? 'stmt-ic-in' : 'stmt-ic-out') + '">' +
           (incoming
-            ? '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>'
-            : '<svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>') +
+             ? '<svg viewBox="0 0 24 24"><path d="M12 21V9M7 14l5-5 5 5M5 3h14"/></svg>'
+             : '<svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>') +
         '</div>' +
         '<div class="stmt-body">' +
           '<div class="stmt-title">' + es(title) +

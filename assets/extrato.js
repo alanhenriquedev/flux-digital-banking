@@ -27,7 +27,33 @@
      ============================================ */
   function typeLabel(t){
     if(t.type === 'CARD_PAYMENT') return 'Cartão';
+    if(t.type === 'ACCOUNT_OPENING') return 'Conta';
+    if(t.type === 'GOAL_DEPOSIT' || t.type === 'GOAL_WITHDRAW') return 'Meta';
+    if(t.type === 'LOAN_PAYMENT' || t.type === 'LOAN') return 'Crédito';
+    if(t.type === 'PIX') return 'PIX';
+    if(t.type === 'TRANSFER') return 'Transferência';
     return t.type || '—';
+  }
+
+  function displayTitle(t, incoming){
+    if(t.type === 'ACCOUNT_OPENING') return 'Saldo inicial';
+    if(t.type === 'GOAL_DEPOSIT') return 'Valor guardado';
+    if(t.type === 'GOAL_WITHDRAW') return 'Valor resgatado';
+    if(t.type === 'LOAN_PAYMENT') return 'Parcela paga';
+    if(t.type === 'LOAN') return 'Crédito recebido';
+    return t.counterpartyName || (incoming ? 'Entrada (' + typeLabel(t) + ')' : 'Saída (' + typeLabel(t) + ')');
+  }
+
+  function displaySubtitle(t){
+    if(t.type === 'ACCOUNT_OPENING') return 'Crédito inicial';
+    if(t.type === 'GOAL_DEPOSIT') return 'Valor reservado';
+    if(t.type === 'GOAL_WITHDRAW') return 'Valor devolvido à conta';
+    if(t.type === 'LOAN') return 'Crédito depositado na conta';
+    if(t.type === 'LOAN_PAYMENT') {
+      var match = /parcela\s+(\d+)/i.exec(t.description || '');
+      return match ? 'Parcela ' + match[1] + ' debitada' : 'Parcela debitada';
+    }
+    return t.description || '';
   }
 
   function typeKey(t){
@@ -79,18 +105,17 @@
   function itemHtml(t){
     var d = directionOf(t);
     var incoming = t.direction === 'IN';
-    var title = t.counterpartyName || (incoming ? 'Entrada (' + typeLabel(t) + ')' : 'Saída (' + typeLabel(t) + ')');
+    var title = displayTitle(t, incoming);
     var subParts = [];
-    if(t.description) subParts.push(t.description);
+    var subtitle = displaySubtitle(t);
+    if(subtitle) subParts.push(subtitle);
     if(t.counterpartyNumber) subParts.push('Conta ' + t.counterpartyNumber);
     var when = formatDateTime(t.createdAt);
     var isCard = t.type === 'CARD_PAYMENT';
     var icClass = isCard ? 'extr-item-ic-card' : (incoming ? 'extr-item-ic-in' : 'extr-item-ic-out');
     var icSvg = isCard
       ? '<rect x="3" y="6" width="18" height="14" rx="2.5"/><path d="M3 10h18"/>'
-      : (incoming
-          ? '<path d="M7 10l5 5 5-5"/><path d="M12 15V3"/>'
-          : '<path d="M7 14l5-5 5 5"/><path d="M12 9v12"/>');
+      : '<path d="M7 8l5-5 5 5"/><path d="M12 3v18"/>';
 
     return '' +
       '<li class="extr-item-li">' +
@@ -277,7 +302,7 @@
       dd('Tipo', es(typeLabel(t))) +
       dd('Direção', es(dirLabel(t))) +
       dd('Status', es(statusLabel(t))) +
-      dd('Descrição', t.description ? es(t.description) : '—') +
+      dd('Descrição', es(displaySubtitle(t) || '—')) +
       dd('Contraparte', t.counterpartyName ? es(t.counterpartyName) : '—') +
       dd('Conta', t.counterpartyNumber ? es(t.counterpartyNumber) : '—') +
       dd('Data', es(formatDateTime(t.createdAt) || '—')) +

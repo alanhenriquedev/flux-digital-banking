@@ -255,10 +255,10 @@ test('reset de senha revoga todas as sessões (revokedReason PASSWORD_CHANGED)',
   assert.strictEqual(relogin.status, 201, 'nova senha permite login');
 });
 
-test('token legado sem sid continua funcionando', async () => {
+test('token sem sid é rejeitado', async () => {
   const legacy = jwt.sign({ sub: await userId(EMAIL_A) }, JWT_SECRET, { expiresIn: '1h' });
   const res = await api('GET', '/auth/me', { token: legacy });
-  assert.strictEqual(res.status, 200, 'token legado aceito');
+  assert.strictEqual(res.status, 401, 'token sem sid rejeitado');
 });
 
 test('lastUsedAt respeita o throttle (sem write a cada request)', async () => {

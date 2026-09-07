@@ -19,7 +19,7 @@ import { SecurityModule } from '../security/security.module';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (config: ConfigService) => ({
-        secret: config.get<string>('JWT_SECRET') ?? 'dev-secret',
+        secret: requireJwtSecret(config),
         signOptions: {
           expiresIn: (config.get<string>('JWT_EXPIRES_IN') ?? '7d') as JwtSignOptions['expiresIn'],
         },
@@ -30,3 +30,11 @@ import { SecurityModule } from '../security/security.module';
   providers: [AuthService, JwtStrategy],
 })
 export class AuthModule {}
+
+function requireJwtSecret(config: ConfigService): string {
+  const secret = config.get<string>('JWT_SECRET');
+  if (!secret || secret.trim().length === 0) {
+    throw new Error('JWT_SECRET must be configured.');
+  }
+  return secret;
+}
