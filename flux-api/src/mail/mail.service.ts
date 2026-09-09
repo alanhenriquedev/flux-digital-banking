@@ -6,9 +6,14 @@ import type { Transporter } from 'nodemailer';
 @Injectable()
 export class MailService implements OnModuleInit {
   private readonly logger = new Logger(MailService.name);
-  private readonly transporter: Transporter;
+  private readonly transporter?: Transporter;
+  private readonly resendApiKey: string | null;
 
   constructor(private readonly config: ConfigService) {
+    this.resendApiKey = config.get<string>('RESEND_API_KEY')?.trim() || null;
+
+    if (this.resendApiKey) return;
+
     const host = this.config.get<string>('MAIL_HOST') ?? 'localhost';
     const port = Number(this.config.get<string>('MAIL_PORT') ?? 1025);
     const user = this.config.get<string>('MAIL_USER') ?? '';
@@ -24,8 +29,13 @@ export class MailService implements OnModuleInit {
   }
 
   async onModuleInit(): Promise<void> {
+    if (this.resendApiKey) {
+      this.logger.log('Resend API configurada.');
+      return;
+    }
+
     try {
-      await this.transporter.verify();
+      await this.transporter?.verify();
       this.logger.log('SMTP disponível.');
     } catch (err) {
       this.logger.warn(`SMTP indisponível; o envio falhará até a configuração ser corrigida: ${err instanceof Error ? err.message : String(err)}`);
@@ -154,8 +164,13 @@ export class MailService implements OnModuleInit {
   }
 
   private async deliver(to: string, subject: string, html: string): Promise<void> {
+    if (this.resendApiKey) {
+      await this.deliverWithResend(to, subject, html);
+      return;
+    }
+
     try {
-      await this.transporter.sendMail({
+      await this.transporter?.sendMail({
         from: this.config.get<string>('MAIL_FROM') ?? 'Flux <noreply@flux.local>',
         to,
         subject,
@@ -163,6 +178,33 @@ export class MailService implements OnModuleInit {
       });
     } catch (err) {
       this.logger.error(`Falha ao enviar e-mail para ${to}`, err instanceof Error ? err.stack : String(err));
+      throw new Error('mail-delivery-failed');
+    }
+  }
+
+  private async deliverWithResend(to: string, subject: string, html: string): Promise<void> {
+    try {
+      const response = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.resendApiKey}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          from: this.config.get<string>('MAIL_FROM') ?? 'Flux <noreply@flux.local>',
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+
+      if (!response.ok) {
+        this.logger.error(`Resend rejeitou o e-mail (HTTP ${response.status}).`);
+        throw new Error('resend-delivery-failed');
+      }
+    } catch (err) {
+      if (err instanceof Error && err.message === 'resend-delivery-failed') throw err;
+      this.logger.error('Falha na requisição HTTPS para o Resend.');
       throw new Error('mail-delivery-failed');
     }
   }

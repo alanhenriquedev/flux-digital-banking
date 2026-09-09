@@ -54,6 +54,30 @@ test('SMTP opcional não impede startup quando indisponível', async () => {
   await assert.doesNotReject(service.onModuleInit());
 });
 
+test('Resend envia o template pela API HTTPS', async () => {
+  const originalFetch = global.fetch;
+  let request;
+  global.fetch = async (url, options) => {
+    request = { url, options };
+    return { ok: true, status: 200 };
+  };
+
+  try {
+    const service = mailService({ RESEND_API_KEY: 're_test_key' });
+    await service.sendVerificationEmail('a@test.local', 'Ana', 'verify-token');
+  } finally {
+    global.fetch = originalFetch;
+  }
+
+  assert.strictEqual(request.url, 'https://api.resend.com/emails');
+  assert.strictEqual(request.options.method, 'POST');
+  assert.strictEqual(request.options.headers.Authorization, 'Bearer re_test_key');
+  const body = JSON.parse(request.options.body);
+  assert.deepStrictEqual(body.to, ['a@test.local']);
+  assert.strictEqual(body.subject, 'Confirme seu e-mail no Flux');
+  assert.ok(body.html.includes('verify-token'));
+});
+
 test('CAS de tokens permite somente um consumo concorrente', async () => {
   const state = {
     emailVerifyToken: 'v', emailVerifyTokenExpiry: new Date(Date.now() + 60_000), emailVerified: false,
