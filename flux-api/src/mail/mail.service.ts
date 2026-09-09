@@ -199,7 +199,14 @@ export class MailService implements OnModuleInit {
       });
 
       if (!response.ok) {
-        this.logger.error(`Resend rejeitou o e-mail (HTTP ${response.status}).`);
+        const responseBody = await response.text();
+        let bodyForLog = responseBody;
+        try {
+          bodyForLog = JSON.stringify(JSON.parse(responseBody));
+        } catch {
+          // Mantém o corpo bruto caso o provedor não retorne JSON válido.
+        }
+        this.logger.error(`Resend rejeitou o e-mail (HTTP ${response.status}): ${bodyForLog}`);
         throw new Error('resend-delivery-failed');
       }
     } catch (err) {
